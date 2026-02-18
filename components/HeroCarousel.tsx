@@ -1,0 +1,429 @@
+"use client";
+
+import { useState, useEffect, useCallback, useRef } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import {
+  motion,
+  AnimatePresence,
+  useMotionValue,
+  useTransform,
+  Variants,
+} from "framer-motion";
+import {
+  ChevronLeft,
+  ChevronRight,
+  ArrowRight,
+  MapPin,
+  BookOpen,
+  Users,
+  Award,
+  Leaf,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+
+export const SLIDES = [
+  {
+    id: 1,
+    image: "/DJI_0057-scaled.jpg",
+    tag: "Heritage & Culture",
+    tagIcon: Leaf,
+    headline: "Preserving the Living\nLegacy of Sikkim's Tribes",
+    subtext:
+      "Dedicated to the documentation, research, and celebration of the indigenous communities that define the cultural fabric of Sikkim.",
+    cta: { label: "Explore Tribes", href: "/tribes" },
+    accent: "#4fd1c5",
+    stat: { value: "12+", label: "Tribal Communities" },
+  },
+  {
+    id: 2,
+    image: "/WhatsApp-Image-2024.jpg",
+    tag: "Research & Documentation",
+    tagIcon: BookOpen,
+    headline: "Advancing Tribal\nKnowledge & Scholarship",
+    subtext:
+      "Conducting ground-breaking research on tribal languages, customs, folklore, and socio-economic conditions across Sikkim.",
+    cta: { label: "View Publications", href: "/about" },
+    accent: "#f0c040",
+    stat: { value: "200+", label: "Research Publications" },
+  },
+  {
+    id: 3,
+    image: "/1-4.jpg",
+    tag: "Training & Capacity Building",
+    tagIcon: Users,
+    headline: "Empowering Communities\nThrough Education",
+    subtext:
+      "Running intensive training programmes and workshops that equip tribal youth with skills for sustainable livelihoods.",
+    cta: { label: "Training Programmes", href: "/updates/training-workshop" },
+    accent: "#4fd1c5",
+    stat: { value: "5000+", label: "Beneficiaries Trained" },
+  },
+  {
+    id: 4,
+    image: "/gate.png",
+    tag: "Awards & Recognition",
+    tagIcon: Award,
+    headline: "Celebrating Excellence\nin Tribal Welfare",
+    subtext:
+      "Honouring outstanding contributions to tribal development, art, and culture through institutional awards and recognition.",
+    cta: { label: "News & Events", href: "/updates/news-events" },
+    accent: "#f0c040",
+    stat: { value: "30+", label: "Years of Service" },
+  },
+  {
+    id: 5,
+    image: "/air.png",
+    tag: "Sikkim's Sacred Landscape",
+    tagIcon: MapPin,
+    headline: "Rooted in the Mountains,\nRich in Tradition",
+    subtext:
+      "From the alpine peaks to the river valleys, the tribal heritage of Sikkim is as vast and profound as its natural landscape.",
+    cta: { label: "Gallery", href: "/gallery" },
+    accent: "#4fd1c5",
+    stat: { value: "Sikkim", label: "The Organic State" },
+  },
+] as const;
+
+const INTERVAL = 5500;
+
+const slideVariants: Variants = {
+  enter: (dir: number) => ({
+    x: dir > 0 ? "100%" : "-100%",
+    opacity: 0,
+  }),
+  center: {
+    x: 0,
+    opacity: 1,
+    transition: { duration: 0.75, ease: [0.25, 0.46, 0.45, 0.94] },
+  },
+  exit: (dir: number) => ({
+    x: dir < 0 ? "100%" : "-100%",
+    opacity: 0,
+    transition: { duration: 0.65, ease: [0.25, 0.46, 0.45, 0.94] },
+  }),
+};
+
+const contentContainer: Variants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.1, delayChildren: 0.35 } },
+};
+
+const fadeUp: Variants = {
+  hidden: { opacity: 0, y: 30 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
+};
+
+const fadeLeft: Variants = {
+  hidden: { opacity: 0, x: -20 },
+  visible: { opacity: 1, x: 0, transition: { duration: 0.5, ease: "easeOut" } },
+};
+
+export default function HeroCarousel() {
+  const [current, setCurrent] = useState(0);
+  const [direction, setDirection] = useState(1);
+  const [paused, setPaused] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const progressRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const slide = SLIDES[current];
+
+  const goTo = useCallback((idx: number, dir: number) => {
+    setDirection(dir);
+    setCurrent(idx);
+    setProgress(0);
+  }, []);
+
+  const next = useCallback(() => {
+    goTo((current + 1) % SLIDES.length, 1);
+  }, [current, goTo]);
+
+  const prev = useCallback(() => {
+    goTo((current - 1 + SLIDES.length) % SLIDES.length, -1);
+  }, [current, goTo]);
+
+  useEffect(() => {
+    if (paused) return;
+    intervalRef.current = setInterval(next, INTERVAL);
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, [paused, next]);
+
+  useEffect(() => {
+    setProgress(0);
+    if (paused) return;
+    const step = 100 / (INTERVAL / 50);
+    progressRef.current = setInterval(() => {
+      setProgress((p) => Math.min(p + step, 100));
+    }, 50);
+    return () => {
+      if (progressRef.current) clearInterval(progressRef.current);
+    };
+  }, [current, paused]);
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft") prev();
+      if (e.key === "ArrowRight") next();
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [prev, next]);
+
+  return (
+    <section
+      className="relative w-full overflow-hidden"
+      style={{ height: "calc(100vh - 145px)", minHeight: 500, maxHeight: 780 }}
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      aria-label="Hero image carousel"
+    >
+      <AnimatePresence initial={false} custom={direction} mode="popLayout">
+        <motion.div
+          key={current}
+          custom={direction}
+          variants={slideVariants}
+          initial="enter"
+          animate="center"
+          exit="exit"
+          className={cn("absolute inset-0 slide-active")}
+        >
+          <div className="absolute inset-0 overflow-hidden">
+            <div className="slide-bg absolute inset-0">
+              <Image
+                src={slide.image}
+                alt={slide.headline.replace("\n", " ")}
+                fill
+                priority={current === 0}
+                className="object-cover"
+                unoptimized
+              />
+            </div>
+
+            <div className="absolute inset-0 bg-gradient-to-r from-[#1a1550]/90 via-[#1a1550]/60 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#1a1550]/80 via-transparent to-transparent" />
+
+            <div
+              className="absolute inset-0 opacity-[0.03]"
+              style={{
+                backgroundImage:
+                  "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
+                backgroundRepeat: "repeat",
+                backgroundSize: "128px",
+              }}
+            />
+          </div>
+
+          <div className="relative h-full max-w-7xl mx-auto px-6 md:px-10 flex flex-col justify-center">
+            <motion.div
+              key={`content-${current}`}
+              variants={contentContainer}
+              initial="hidden"
+              animate="visible"
+              className="max-w-2xl"
+            >
+              <motion.div
+                variants={fadeLeft}
+                className="flex items-center gap-2 mb-5"
+              >
+                <div
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-full text-[11px] font-bold tracking-[.14em] uppercase border"
+                  style={{
+                    background: `${slide.accent}18`,
+                    borderColor: `${slide.accent}40`,
+                    color: slide.accent,
+                  }}
+                >
+                  <slide.tagIcon className="w-3 h-3" />
+                  {slide.tag}
+                </div>
+              </motion.div>
+
+              <motion.h2
+                variants={fadeUp}
+                className="font-display font-bold text-white text-[clamp(28px,4.5vw,58px)] leading-[1.1] tracking-tight mb-5"
+              >
+                {slide.headline.split("\n").map((line, i) => (
+                  <span key={i} className="block">
+                    {i === 1 ? (
+                      <span style={{ color: slide.accent }}>{line}</span>
+                    ) : (
+                      line
+                    )}
+                  </span>
+                ))}
+              </motion.h2>
+
+              <motion.p
+                variants={fadeUp}
+                className="text-white/70 text-[15px] md:text-[16.5px] leading-relaxed mb-8 max-w-lg"
+              >
+                {slide.subtext}
+              </motion.p>
+
+              {/* CTA row */}
+              <motion.div
+                variants={fadeUp}
+                className="flex items-center gap-4 flex-wrap"
+              >
+                <Link
+                  href={slide.cta.href}
+                  className="group flex items-center gap-2 px-6 py-3 rounded-lg text-[14px] font-semibold tracking-wide transition-all duration-300 shadow-lg"
+                  style={{
+                    background: slide.accent,
+                    color: "#1a1550",
+                  }}
+                >
+                  {slide.cta.label}
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" />
+                </Link>
+
+                <div className="flex items-center gap-3 px-5 py-2.5 rounded-lg bg-white/10 backdrop-blur-sm border border-white/15">
+                  <div>
+                    <div
+                      className="text-white font-display font-bold text-[22px] leading-none"
+                      style={{ color: slide.accent }}
+                    >
+                      {slide.stat.value}
+                    </div>
+                    <div className="text-white/55 text-[11px] tracking-wide mt-0.5">
+                      {slide.stat.label}
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            </motion.div>
+          </div>
+        </motion.div>
+      </AnimatePresence>
+
+      <div className="absolute right-0 top-0 bottom-0 w-[30%] pointer-events-none hidden lg:block">
+        <div
+          className="absolute right-0 top-1/2 -translate-y-1/2 w-64 h-64 rounded-full blur-[80px] opacity-20"
+          style={{ background: slide.accent }}
+        />
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={`deco-${current}`}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{
+              opacity: 1,
+              scale: 1,
+              transition: { delay: 0.5, duration: 0.8 },
+            }}
+            exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.3 } }}
+            className="absolute right-12 top-1/2 -translate-y-1/2 flex flex-col items-center gap-3"
+          >
+            <div
+              className="text-[80px] font-display font-bold leading-none select-none"
+              style={{ color: `${slide.accent}15` }}
+            >
+              {String(current + 1).padStart(2, "0")}
+            </div>
+          </motion.div>
+        </AnimatePresence>
+      </div>
+
+      <div className="absolute bottom-0 left-0 right-0">
+        <div className="h-[2px] bg-white/10 w-full">
+          <motion.div
+            className="h-full"
+            style={{ width: `${progress}%`, background: slide.accent }}
+            transition={{ duration: 0 }}
+          />
+        </div>
+
+        <div className="max-w-7xl mx-auto px-6 md:px-10 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            {SLIDES.map((s, i) => (
+              <button
+                key={s.id}
+                onClick={() => goTo(i, i > current ? 1 : -1)}
+                aria-label={`Go to slide ${i + 1}`}
+                className="relative flex items-center justify-center"
+              >
+                <span
+                  className={cn(
+                    "block rounded-full transition-all duration-400",
+                    i === current ? "w-6 h-2" : "w-2 h-2 hover:bg-white/60",
+                  )}
+                  style={{
+                    background:
+                      i === current ? slide.accent : "rgba(255,255,255,0.35)",
+                  }}
+                />
+              </button>
+            ))}
+          </div>
+
+          <div className="flex items-center gap-4">
+            <span className="text-white/40 text-[12px] font-mono tracking-widest hidden sm:block">
+              {String(current + 1).padStart(2, "0")} /{" "}
+              {String(SLIDES.length).padStart(2, "0")}
+            </span>
+
+            <div className="flex gap-2">
+              <NavButton onClick={prev} dir="prev" accent={slide.accent} />
+              <NavButton onClick={next} dir="next" accent={slide.accent} />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="absolute right-6 top-1/2 -translate-y-1/2 hidden xl:flex flex-col gap-2">
+        {SLIDES.map((s, i) => (
+          <button
+            key={s.id}
+            onClick={() => goTo(i, i > current ? 1 : -1)}
+            aria-label={`Go to slide ${i + 1}`}
+            className={cn(
+              "relative w-12 h-8 rounded overflow-hidden border transition-all duration-300",
+              i === current
+                ? "border-[#4fd1c5] scale-110 shadow-lg"
+                : "border-white/20 opacity-50 hover:opacity-80 hover:scale-105",
+            )}
+          >
+            <Image
+              src={s.image}
+              alt={`Slide ${i + 1}`}
+              fill
+              className="object-cover"
+              unoptimized
+            />
+            {i === current && (
+              <div className="absolute inset-0 bg-[#4fd1c5]/20" />
+            )}
+          </button>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function NavButton({
+  onClick,
+  dir,
+  accent,
+}: {
+  onClick: () => void;
+  dir: "prev" | "next";
+  accent: string;
+}) {
+  return (
+    <motion.button
+      whileHover={{ scale: 1.08 }}
+      whileTap={{ scale: 0.94 }}
+      onClick={onClick}
+      aria-label={dir === "prev" ? "Previous slide" : "Next slide"}
+      className="w-9 h-9 rounded-lg bg-white/10 backdrop-blur-sm border border-white/15 flex items-center justify-center text-white hover:border-white/40 transition-all duration-200 hover:bg-white/20"
+    >
+      {dir === "prev" ? (
+        <ChevronLeft className="w-4 h-4" />
+      ) : (
+        <ChevronRight className="w-4 h-4" />
+      )}
+    </motion.button>
+  );
+}
