@@ -46,11 +46,10 @@ const LOGOS = [
 ];
 
 const RIGHT_LOGOS = [
-  { src: "/logo_tri.png", alt: "TRITC Sikkim", height: 85 },
+  { src: "/tribal.png", alt: "TRITC Sikkim", height: 85 },
   { src: "/Sunawlo-Sikkim.webp", alt: "Saamarth Sikkim", height: 75 },
 ];
 
-// Fixed dropdown variants with proper typing
 const dropdownVariants: Variants = {
   hidden: {
     opacity: 0,
@@ -67,7 +66,7 @@ const dropdownVariants: Variants = {
     scaleY: 1,
     transition: {
       duration: 0.18,
-      ease: [0.25, 0.1, 0.25, 1], // cubic-bezier equivalent to easeOut
+      ease: [0.25, 0.1, 0.25, 1],
     },
   },
   exit: {
@@ -76,12 +75,11 @@ const dropdownVariants: Variants = {
     scaleY: 0.97,
     transition: {
       duration: 0.12,
-      ease: [0.4, 0, 0.2, 1], // cubic-bezier equivalent to easeIn
+      ease: [0.4, 0, 0.2, 1],
     },
   },
 };
 
-// Fixed item variants with proper typing
 const itemVariants: Variants = {
   hidden: { opacity: 0, x: -6 },
   visible: (i: number) => ({
@@ -133,11 +131,11 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <header className="w-full font-body sticky top-0 z-50 shadow-md">
-      <div className="bg-[#1e195e] text-white py-1.5 px-4 md:px-8 flex justify-end items-center">
+    <header className="w-full font-body sticky top-0 z-50 shadow-md bg-white">
+      <div className="bg-[#1077A6] text-white py-1.5 px-4 md:px-8 flex justify-end items-center">
         <Link
           href="/screen-reader"
-          className="flex items-center gap-2 text-[11px] tracking-wide text-white/80 hover:text-[#4fd1c5] transition-colors duration-200"
+          className="flex items-center gap-2 text-[11px] tracking-wide text-white/80 hover:text-[#f4c430] transition-colors duration-200"
         >
           <Accessibility className="w-3.5 h-3.5" />
           Screen Reader Access
@@ -184,7 +182,6 @@ export default function Navbar() {
             </div>
           </div>
 
-          {/* Mobile layout */}
           <div className="md:hidden space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -221,7 +218,21 @@ export default function Navbar() {
         </div>
       </div>
 
-      <nav className="bg-[#1a1550]">
+      <div className="w-full bg-white">
+        <div
+          className="w-full h-[26px] md:h-[30px] pointer-events-none"
+          style={{
+            backgroundImage: "url('/main-tri.png')",
+            backgroundRepeat: "repeat-x",
+            backgroundSize: "auto 100%",
+            backgroundPosition: "center bottom",
+            filter:
+              "brightness(0) saturate(100%) invert(73%) sepia(54%) saturate(1000%) hue-rotate(0deg) brightness(105%) contrast(101%)",
+          }}
+        />
+      </div>
+
+      <nav className="bg-[#1077A6] w-full">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           <div className="hidden md:flex items-center justify-center">
             {NAV_ITEMS.map((item) => (
@@ -237,7 +248,7 @@ export default function Navbar() {
             ))}
           </div>
 
-          <div className="md:hidden flex items-center justify-between">
+          <div className="md:hidden flex items-center justify-between py-2">
             <div className="text-white/70 text-sm font-medium tracking-wide">
               Navigation Menu
             </div>
@@ -263,7 +274,7 @@ export default function Navbar() {
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: 0.22, ease: "easeInOut" }}
-              className="md:hidden overflow-hidden bg-gradient-to-b from-[#1e195e] to-[#1a1550] border-t border-white/10"
+              className="md:hidden overflow-hidden bg-gradient-to-b from-[#1077A6] to-[#0e6590] border-t border-white/10"
             >
               {NAV_ITEMS.map((item) => (
                 <div key={item.label}>
@@ -272,9 +283,9 @@ export default function Navbar() {
                     onClick={() =>
                       !("dropdown" in item) && setMobileOpen(false)
                     }
-                    className="flex items-center gap-3 px-6 py-4 text-sm text-white/90 border-b border-white/10 hover:bg-white/10 transition-all duration-200 hover:pl-8"
+                    className="flex items-center gap-3 px-6 py-4 text-sm text-white/90 border-b border-white/10 hover:bg-[#f4c430] hover:text-black transition-all duration-200 hover:pl-8"
                   >
-                    <item.icon className="w-4 h-4 text-[#4fd1c5]" />
+                    <item.icon className="w-4 h-4 text-white group-hover:text-black" />
                     <span className="font-medium">{item.label}</span>
                   </Link>
                   {"dropdown" in item &&
@@ -283,9 +294,9 @@ export default function Navbar() {
                         key={sub.label}
                         href={sub.href}
                         onClick={() => setMobileOpen(false)}
-                        className="flex items-center gap-2 px-10 py-3 text-xs text-white/60 border-b border-white/5 hover:bg-white/5 hover:text-white hover:pl-12 transition-all duration-200"
+                        className="flex items-center gap-2 px-10 py-3 text-xs text-white/60 border-b border-white/5 hover:bg-[#f4c430] hover:text-black hover:pl-12 transition-all duration-200"
                       >
-                        <span className="w-1 h-1 rounded-full bg-[#4fd1c5]/60"></span>
+                        <span className="w-1 h-1 rounded-full bg-[#f4c430]/60 group-hover:bg-black"></span>
                         {sub.label}
                       </Link>
                     ))}
@@ -318,12 +329,12 @@ function NavItem({
         href={item.href}
         className={cn(
           "relative flex items-center gap-2 px-6 py-[14px] text-[14px] font-medium tracking-wide transition-all duration-300 select-none group overflow-hidden",
-          active ? "bg-white text-[#322880]" : "text-white hover:text-white",
+          active ? "bg-[#f4c430] text-black" : "text-white hover:text-black",
         )}
       >
         <span
           className={cn(
-            "absolute inset-0 bg-[#4fd1c5] transition-all duration-300",
+            "absolute inset-0 bg-[#f4c430] transition-all duration-300",
             active
               ? "opacity-100 scale-100"
               : "opacity-0 scale-0 group-hover:opacity-100 group-hover:scale-100",
@@ -337,9 +348,7 @@ function NavItem({
           className={cn(
             "w-[15px] h-[15px] relative z-10 transition-all duration-300",
             "group-hover:scale-110 group-hover:rotate-3",
-            active
-              ? "text-[#322880]"
-              : "text-white/90 group-hover:text-[#1a1550]",
+            active ? "text-black" : "text-white/90 group-hover:text-black",
           )}
         />
 
@@ -347,7 +356,7 @@ function NavItem({
           className={cn(
             "relative z-10 transition-all duration-300 font-medium",
             "group-hover:translate-x-0.5",
-            active ? "text-[#322880]" : "text-white group-hover:text-[#1a1550]",
+            active ? "text-black" : "text-white group-hover:text-black",
           )}
         >
           {item.label}
@@ -359,18 +368,18 @@ function NavItem({
               "w-3 h-3 relative z-10 transition-all duration-300",
               "group-hover:translate-y-0.5",
               active
-                ? "rotate-180 text-[#322880]"
-                : "text-white/70 group-hover:text-[#1a1550] group-hover:rotate-180",
+                ? "rotate-180 text-black"
+                : "text-white/70 group-hover:text-black group-hover:rotate-180",
             )}
           />
         )}
 
         <span
           className={cn(
-            "absolute bottom-0 left-1/2 right-1/2 h-0.5 bg-[#1a1550] transition-all duration-300",
+            "absolute bottom-0 left-1/2 right-1/2 h-0.5 bg-[#f4c430] transition-all duration-300",
             "group-hover:left-0 group-hover:right-0",
             active
-              ? "left-0 right-0 bg-[#1a1550]"
+              ? "left-0 right-0 bg-[#f4c430]"
               : "scale-x-0 group-hover:scale-x-100",
           )}
         />
@@ -384,13 +393,11 @@ function NavItem({
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="absolute top-full left-0 bg-white shadow-2xl border-t-2 border-[#4fd1c5] min-w-[240px] z-50 overflow-hidden rounded-b-lg"
+            className="absolute top-full left-0 bg-white shadow-2xl border-t-2 border-[#f4c430] min-w-[240px] z-50 overflow-hidden rounded-b-lg"
             style={{ transformOrigin: "top" }}
           >
-            {/* Decorative header gradient */}
-            <div className="h-1 w-full bg-gradient-to-r from-[#4fd1c5] via-[#4fd1c5]/80 to-[#4fd1c5]" />
+            <div className="h-1 w-full bg-gradient-to-r from-[#f4c430] via-[#f4c430]/80 to-[#f4c430]" />
 
-            {/* Dropdown */}
             {"dropdown" in item &&
               item.dropdown.map((sub, i) => (
                 <motion.div
@@ -404,12 +411,12 @@ function NavItem({
                     href={sub.href}
                     className="group/sub relative block px-5 py-[12px] text-[13px] font-medium text-[#322880] border-b border-gray-100 last:border-0 overflow-hidden"
                   >
-                    <span className="absolute inset-0 bg-gradient-to-r from-[#1a1550] to-[#2a2580] opacity-0 group-hover/sub:opacity-100 transition-opacity duration-200" />
+                    <span className="absolute inset-0 bg-gradient-to-r from-[#f4c430] to-[#e6b800] opacity-0 group-hover/sub:opacity-100 transition-opacity duration-200" />
 
-                    <span className="absolute left-0 top-1/2 w-0 h-0 bg-[#4fd1c5] group-hover/sub:w-1 group-hover/sub:h-full group-hover/sub:top-0 transition-all duration-200" />
+                    <span className="absolute left-0 top-1/2 w-0 h-0 bg-[#f4c430] group-hover/sub:w-1 group-hover/sub:h-full group-hover/sub:top-0 transition-all duration-200" />
 
-                    <span className="relative z-10 flex items-center gap-2 pl-2 group-hover/sub:pl-3 transition-all duration-200 group-hover/sub:text-white">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#4fd1c5] opacity-0 group-hover/sub:opacity-100 transition-all duration-200 group-hover/sub:scale-110 group-hover/sub:shadow-[0_0_8px_rgba(79,209,197,0.6)]" />
+                    <span className="relative z-10 flex items-center gap-2 pl-2 group-hover/sub:pl-3 transition-all duration-200 group-hover/sub:text-black">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#f4c430] opacity-0 group-hover/sub:opacity-100 transition-all duration-200 group-hover/sub:scale-110 group-hover/sub:shadow-[0_0_8px_rgba(244,196,48,0.6)]" />
                       {sub.label}
                     </span>
                   </Link>

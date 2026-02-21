@@ -32,7 +32,7 @@ export const SLIDES = [
     subtext:
       "Dedicated to the documentation, research, and celebration of the indigenous communities that define the cultural fabric of Sikkim.",
     cta: { label: "Explore Tribes", href: "/tribes" },
-    accent: "#4fd1c5",
+    accent: "#f4c430",
     stat: { value: "12+", label: "Tribal Communities" },
   },
   {
@@ -44,7 +44,7 @@ export const SLIDES = [
     subtext:
       "Conducting ground-breaking research on tribal languages, customs, folklore, and socio-economic conditions across Sikkim.",
     cta: { label: "View Publications", href: "/about" },
-    accent: "#f0c040",
+    accent: "#f4c430",
     stat: { value: "200+", label: "Research Publications" },
   },
   {
@@ -56,7 +56,7 @@ export const SLIDES = [
     subtext:
       "Running intensive training programmes and workshops that equip tribal youth with skills for sustainable livelihoods.",
     cta: { label: "Training Programmes", href: "/updates/training-workshop" },
-    accent: "#4fd1c5",
+    accent: "#f4c430",
     stat: { value: "5000+", label: "Beneficiaries Trained" },
   },
   {
@@ -68,7 +68,7 @@ export const SLIDES = [
     subtext:
       "Honouring outstanding contributions to tribal development, art, and culture through institutional awards and recognition.",
     cta: { label: "News & Events", href: "/updates/news-events" },
-    accent: "#f0c040",
+    accent: "#f4c430",
     stat: { value: "30+", label: "Years of Service" },
   },
   {
@@ -80,7 +80,7 @@ export const SLIDES = [
     subtext:
       "From the alpine peaks to the river valleys, the tribal heritage of Sikkim is as vast and profound as its natural landscape.",
     cta: { label: "Gallery", href: "/gallery" },
-    accent: "#4fd1c5",
+    accent: "#f4c430",
     stat: { value: "Sikkim", label: "The Organic State" },
   },
 ] as const;
@@ -202,8 +202,8 @@ export default function HeroCarousel() {
               />
             </div>
 
-            <div className="absolute inset-0 bg-gradient-to-r from-[#1a1550]/90 via-[#1a1550]/60 to-transparent" />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#1a1550]/80 via-transparent to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-r from-[#1077A6]/90 via-[#1077A6]/60 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#1077A6]/80 via-transparent to-transparent" />
 
             <div
               className="absolute inset-0 opacity-[0.03]"
@@ -231,9 +231,9 @@ export default function HeroCarousel() {
                 <div
                   className="flex items-center gap-2 px-3 py-1.5 rounded-full text-[11px] font-bold tracking-[.14em] uppercase border"
                   style={{
-                    background: `${slide.accent}18`,
-                    borderColor: `${slide.accent}40`,
-                    color: slide.accent,
+                    background: `#f4c43018`,
+                    borderColor: `#f4c43040`,
+                    color: "#f4c430",
                   }}
                 >
                   <slide.tagIcon className="w-3 h-3" />
@@ -248,7 +248,7 @@ export default function HeroCarousel() {
                 {slide.headline.split("\n").map((line, i) => (
                   <span key={i} className="block">
                     {i === 1 ? (
-                      <span style={{ color: slide.accent }}>{line}</span>
+                      <span style={{ color: "#f4c430" }}>{line}</span>
                     ) : (
                       line
                     )}
@@ -263,17 +263,16 @@ export default function HeroCarousel() {
                 {slide.subtext}
               </motion.p>
 
-              {/* CTA row */}
               <motion.div
                 variants={fadeUp}
                 className="flex items-center gap-4 flex-wrap"
               >
                 <Link
                   href={slide.cta.href}
-                  className="group flex items-center gap-2 px-6 py-3 rounded-lg text-[14px] font-semibold tracking-wide transition-all duration-300 shadow-lg"
+                  className="group flex items-center gap-2 px-6 py-3 rounded-lg text-[14px] font-semibold tracking-wide transition-all duration-300 shadow-lg hover:scale-105"
                   style={{
-                    background: slide.accent,
-                    color: "#1a1550",
+                    background: "#f4c430",
+                    color: "#1077A6",
                   }}
                 >
                   {slide.cta.label}
@@ -284,7 +283,7 @@ export default function HeroCarousel() {
                   <div>
                     <div
                       className="text-white font-display font-bold text-[22px] leading-none"
-                      style={{ color: slide.accent }}
+                      style={{ color: "#f4c430" }}
                     >
                       {slide.stat.value}
                     </div>
@@ -302,7 +301,7 @@ export default function HeroCarousel() {
       <div className="absolute right-0 top-0 bottom-0 w-[30%] pointer-events-none hidden lg:block">
         <div
           className="absolute right-0 top-1/2 -translate-y-1/2 w-64 h-64 rounded-full blur-[80px] opacity-20"
-          style={{ background: slide.accent }}
+          style={{ background: "#f4c430" }}
         />
         <AnimatePresence mode="wait">
           <motion.div
@@ -318,7 +317,7 @@ export default function HeroCarousel() {
           >
             <div
               className="text-[80px] font-display font-bold leading-none select-none"
-              style={{ color: `${slide.accent}15` }}
+              style={{ color: "#f4c43015" }}
             >
               {String(current + 1).padStart(2, "0")}
             </div>
@@ -330,7 +329,7 @@ export default function HeroCarousel() {
         <div className="h-[2px] bg-white/10 w-full">
           <motion.div
             className="h-full"
-            style={{ width: `${progress}%`, background: slide.accent }}
+            style={{ width: `${progress}%`, background: "#f4c430" }}
             transition={{ duration: 0 }}
           />
         </div>
@@ -351,7 +350,7 @@ export default function HeroCarousel() {
                   )}
                   style={{
                     background:
-                      i === current ? slide.accent : "rgba(255,255,255,0.35)",
+                      i === current ? "#f4c430" : "rgba(255,255,255,0.35)",
                   }}
                 />
               </button>
@@ -365,8 +364,8 @@ export default function HeroCarousel() {
             </span>
 
             <div className="flex gap-2">
-              <NavButton onClick={prev} dir="prev" accent={slide.accent} />
-              <NavButton onClick={next} dir="next" accent={slide.accent} />
+              <NavButton onClick={prev} dir="prev" />
+              <NavButton onClick={next} dir="next" />
             </div>
           </div>
         </div>
@@ -381,7 +380,7 @@ export default function HeroCarousel() {
             className={cn(
               "relative w-12 h-8 rounded overflow-hidden border transition-all duration-300",
               i === current
-                ? "border-[#4fd1c5] scale-110 shadow-lg"
+                ? "border-[#f4c430] scale-110 shadow-lg"
                 : "border-white/20 opacity-50 hover:opacity-80 hover:scale-105",
             )}
           >
@@ -393,7 +392,7 @@ export default function HeroCarousel() {
               unoptimized
             />
             {i === current && (
-              <div className="absolute inset-0 bg-[#4fd1c5]/20" />
+              <div className="absolute inset-0 bg-[#f4c430]/20" />
             )}
           </button>
         ))}
@@ -405,11 +404,9 @@ export default function HeroCarousel() {
 function NavButton({
   onClick,
   dir,
-  accent,
 }: {
   onClick: () => void;
   dir: "prev" | "next";
-  accent: string;
 }) {
   return (
     <motion.button
@@ -417,7 +414,7 @@ function NavButton({
       whileTap={{ scale: 0.94 }}
       onClick={onClick}
       aria-label={dir === "prev" ? "Previous slide" : "Next slide"}
-      className="w-9 h-9 rounded-lg bg-white/10 backdrop-blur-sm border border-white/15 flex items-center justify-center text-white hover:border-white/40 transition-all duration-200 hover:bg-white/20"
+      className="w-9 h-9 rounded-lg bg-white/10 backdrop-blur-sm border border-white/15 flex items-center justify-center text-white hover:border-[#f4c430] hover:bg-[#f4c430]/20 transition-all duration-200"
     >
       {dir === "prev" ? (
         <ChevronLeft className="w-4 h-4" />

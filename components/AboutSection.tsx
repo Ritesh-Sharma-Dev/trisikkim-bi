@@ -67,7 +67,7 @@ export default function AboutSection() {
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
-            className="text-center text-[11px] font-bold uppercase tracking-[.18em] text-[#4fd1c5] mb-8"
+            className="text-center text-[11px] font-bold uppercase tracking-[.18em] text-[#f4c430] mb-8"
           >
             Distinguished Leadership
           </motion.p>
@@ -100,7 +100,7 @@ export default function AboutSection() {
             <SectionLabel icon={Mountain} text="Geography & Heritage" />
             <SectionTitle>About Sikkim</SectionTitle>
 
-            <div className="space-y-4 text-[15px] text-[#1a1550]/70 leading-[1.85] mt-6">
+            <div className="space-y-4 text-[15px] text-[#1a1550]/80 leading-[1.85] mt-6">
               <p>
                 Sikkim, a state in India, is located in the northeastern part of
                 the country, within the eastern Himalayas. It stands as one of
@@ -141,7 +141,7 @@ export default function AboutSection() {
             viewport={{ once: true }}
             className="lg:pt-16"
           >
-            <div className="relative rounded-2xl overflow-hidden mb-8 aspect-[4/3] bg-gradient-to-br from-[#1a1550] to-[#322880]">
+            <div className="relative rounded-2xl overflow-hidden mb-8 aspect-[4/3] bg-gradient-to-br from-[#1077A6] to-[#0e6590]">
               <Image
                 src="/modi.jpg"
                 alt="Sikkim Landscape"
@@ -150,12 +150,12 @@ export default function AboutSection() {
                 unoptimized
               />
 
-              <div className="absolute inset-0 bg-gradient-to-t from-[#1a1550]/80 via-transparent to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#1077A6]/80 via-transparent to-transparent" />
               <div className="absolute bottom-5 left-5 right-5">
                 <p className="text-white font-display font-bold text-lg leading-tight">
                   The Organic State of India
                 </p>
-                <p className="text-[#4fd1c5] text-[12px] mt-1 tracking-wide">
+                <p className="text-[#f4c430] text-[12px] mt-1 tracking-wide">
                   Northeast Himalayas · Gangtok Capital
                 </p>
               </div>
@@ -170,10 +170,10 @@ export default function AboutSection() {
                   initial="hidden"
                   whileInView="visible"
                   viewport={{ once: true }}
-                  className="group p-4 rounded-xl border border-[#322880]/10 bg-[#f4f3fb]/60 hover:bg-[#1a1550] transition-all duration-300 cursor-default"
+                  className="group p-4 rounded-xl border border-[#1077A6]/10 bg-[#f4f3fb]/60 hover:bg-[#1077A6] transition-all duration-300 cursor-default"
                 >
-                  <div className="w-8 h-8 rounded-lg bg-[#4fd1c5]/15 group-hover:bg-[#4fd1c5]/25 flex items-center justify-center mb-3 transition-colors duration-300">
-                    <fact.icon className="w-4 h-4 text-[#1a1550] group-hover:text-[#4fd1c5] transition-colors duration-300" />
+                  <div className="w-8 h-8 rounded-lg bg-[#f4c430]/15 group-hover:bg-[#f4c430]/25 flex items-center justify-center mb-3 transition-colors duration-300">
+                    <fact.icon className="w-4 h-4 text-[#1a1550] group-hover:text-[#f4c430] transition-colors duration-300" />
                   </div>
                   <div className="font-display font-bold text-[20px] text-[#1a1550] group-hover:text-white leading-none transition-colors duration-300">
                     {fact.value}
@@ -189,7 +189,7 @@ export default function AboutSection() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 md:px-8">
-        <div className="h-px bg-gradient-to-r from-transparent via-[#322880]/15 to-transparent" />
+        <div className="h-px bg-gradient-to-r from-transparent via-[#1077A6]/15 to-transparent" />
       </div>
 
       <div className="max-w-7xl mx-auto px-4 md:px-8 py-14 md:py-20">
@@ -206,19 +206,19 @@ export default function AboutSection() {
                 number="01"
                 title="Research & Documentation"
                 description="Preservation of Tribal Community knowledge, oral traditions, and cultural practices through systematic documentation."
-                accent="#4fd1c5"
+                accent="#f4c430"
               />
               <TRICard
                 number="02"
                 title="Training & Capacity Building"
                 description="Empowering tribal communities through training on laws, constitutional provisions, and socio-economic programs."
-                accent="#f0c040"
+                accent="#f4c430"
               />
               <TRICard
                 number="03"
                 title="Grants & Financial Support"
                 description="Facilitating Grants-in-Aid under the Ministry of Tribal Affairs' 'Research and Mass Information' scheme."
-                accent="#4fd1c5"
+                accent="#f4c430"
               />
             </div>
           </motion.div>
@@ -233,7 +233,7 @@ export default function AboutSection() {
             <SectionLabel icon={Building2} text="Our Institution" />
             <SectionTitle>About Tribal Research Institute</SectionTitle>
 
-            <div className="space-y-4 text-[15px] text-[#1a1550]/70 leading-[1.85] mt-6">
+            <div className="space-y-4 text-[15px] text-[#1a1550]/80 leading-[1.85] mt-6">
               <p>
                 The Schemes of the Government of India reveals that, through the
                 Ministry of Tribal Affairs, Government of India has decided to
@@ -273,7 +273,7 @@ export default function AboutSection() {
             >
               <Link
                 href="/about"
-                className="group inline-flex items-center gap-2.5 bg-[#1a1550] hover:bg-[#322880] text-white px-6 py-3 rounded-lg text-[14px] font-semibold tracking-wide transition-all duration-300 shadow-md hover:shadow-lg hover:shadow-[#1a1550]/25"
+                className="group inline-flex items-center gap-2.5 bg-[#1077A6] hover:bg-[#f4c430] text-white hover:text-black px-6 py-3 rounded-lg text-[14px] font-semibold tracking-wide transition-all duration-300 shadow-md hover:shadow-lg hover:shadow-[#f4c430]/25"
               >
                 Read More
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" />
@@ -298,8 +298,8 @@ function DignitaryCard({
   return (
     <div className="group flex flex-col items-center text-center">
       <div className="relative mb-4">
-        <div className="absolute inset-0 rounded-full bg-[#4fd1c5]/20 blur-lg scale-110 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-        <div className="relative w-[120px] h-[120px] rounded-full overflow-hidden border-3 border-white shadow-lg ring-2 ring-[#322880]/10 group-hover:ring-[#4fd1c5]/40 transition-all duration-300">
+        <div className="absolute inset-0 rounded-full bg-[#f4c430]/20 blur-lg scale-110 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <div className="relative w-[120px] h-[120px] rounded-full overflow-hidden border-3 border-white shadow-lg ring-2 ring-[#1077A6]/10 group-hover:ring-[#f4c430]/40 transition-all duration-300">
           <Image
             src={image}
             alt={name}
@@ -310,7 +310,7 @@ function DignitaryCard({
         </div>
       </div>
 
-      <h3 className="font-display font-bold text-[#1a1550] text-[14px] leading-snug group-hover:text-[#322880] transition-colors duration-200">
+      <h3 className="font-display font-bold text-[#1a1550] text-[14px] leading-snug group-hover:text-[#f4c430] transition-colors duration-200">
         {name}
       </h3>
       <p className="text-[#1a1550]/50 text-[12.5px] mt-1">{role}</p>
@@ -327,10 +327,10 @@ function SectionLabel({
 }) {
   return (
     <div className="flex items-center gap-2 mb-3">
-      <div className="w-6 h-6 rounded bg-[#4fd1c5]/15 flex items-center justify-center">
+      <div className="w-6 h-6 rounded bg-[#f4c430]/15 flex items-center justify-center">
         <Icon className="w-3.5 h-3.5 text-[#1a1550]" />
       </div>
-      <span className="text-[11px] font-bold uppercase tracking-[.18em] text-[#4fd1c5]">
+      <span className="text-[11px] font-bold uppercase tracking-[.18em] text-[#f4c430]">
         {text}
       </span>
     </div>
@@ -341,7 +341,7 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
     <h2 className="font-display font-bold text-[#1a1550] text-[clamp(22px,3vw,34px)] leading-tight tracking-tight">
       {children}
-      <span className="block w-12 h-1 bg-[#4fd1c5] rounded-full mt-3" />
+      <span className="block w-12 h-1 bg-[#f4c430] rounded-full mt-3" />
     </h2>
   );
 }
@@ -361,7 +361,7 @@ function TRICard({
     <motion.div
       whileHover={{ x: 4 }}
       transition={{ duration: 0.2 }}
-      className="group flex items-start gap-4 p-5 rounded-xl border border-[#322880]/10 bg-[#f4f3fb]/50 hover:bg-white hover:border-[#4fd1c5]/30 hover:shadow-md transition-all duration-300"
+      className="group flex items-start gap-4 p-5 rounded-xl border border-[#1077A6]/10 bg-[#f4f3fb]/50 hover:bg-white hover:border-[#f4c430]/30 hover:shadow-md transition-all duration-300"
     >
       <div
         className="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center text-[13px] font-bold font-display transition-all duration-300"
