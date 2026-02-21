@@ -428,7 +428,6 @@ function GallerySection({
                 </div>
               </div>
 
-              {/* Corner number - using secondary color */}
               <div className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                 <span
                   className="text-[10px] font-bold font-mono px-1.5 py-0.5 rounded"
@@ -442,7 +441,7 @@ function GallerySection({
         </AnimatePresence>
       </div>
 
-      {/* Show more / less - using primary color */}
+    
       {hasMore && (
         <motion.div
           initial={{ opacity: 0 }}
@@ -490,7 +489,7 @@ function GallerySection({
   );
 }
 
-/* ─── Filter Tab ─────────────────────────────────────────────────────── */
+
 function FilterTab({
   children,
   active,
