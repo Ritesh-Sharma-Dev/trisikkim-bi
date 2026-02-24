@@ -49,14 +49,14 @@ export default function Footer() {
   return (
     <>
       <div
-        className="w-full h-[26px] md:h-[30px] pointer-events-none"
+        className="w-full h-[26px] md:h-[70px] pointer-events-none"
         style={{
           backgroundImage: "url('/main-tri.png')",
           backgroundRepeat: "repeat-x",
           backgroundSize: "auto 100%",
           backgroundPosition: "center bottom",
-          filter:
-            "brightness(0) saturate(100%) invert(73%) sepia(54%) saturate(1000%) hue-rotate(0deg) brightness(105%) contrast(101%)", // #f4c430 color
+          // filter:
+          //   "brightness(0) saturate(100%) invert(73%) sepia(54%) saturate(1000%) hue-rotate(0deg) brightness(105%) contrast(101%)", // #f4c430 color
         }}
       />
 
