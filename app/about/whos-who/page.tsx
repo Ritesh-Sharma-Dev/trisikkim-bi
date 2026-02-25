@@ -2,44 +2,13 @@
 
 import { motion, Variants } from "framer-motion";
 import { Users, Search, X } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-const STAFF = [
-  { name: "Mr. Suman Gurung", position: "Director cum Special Secretary" },
-  { name: "Mrs. Kabita Subba", position: "Joint Secretary" },
-  { name: "Mrs. Chungkula Bhutia", position: "Deputy Secretary" },
-  { name: "Mr. Sonam Ongchen Bhutia", position: "Assistant Director - I" },
-  { name: "Mrs. Santu Rai", position: "Assistant Director - II" },
-  { name: "Ms. Mekeena Lepcha", position: "Welfare Inspector" },
-  { name: "Mr. Naresh Kumar Adhikari", position: "Welfare Inspector" },
-  { name: "Ms. Khusbu Chettri", position: "Office Assistant" },
-  { name: "Mr. Pintso Lepcha", position: "Office Assistant" },
-  { name: "Mr. Suresh Rai", position: "Assistant Lineman" },
-  { name: "Mr. Sanejit Sarki", position: "Office Attendant" },
-  { name: "Mr. Ganesh Kumar Subba", position: "Research Officer - I" },
-  { name: "Ms. Pabitra Sharma", position: "Office Attendant" },
-  { name: "Mr. Hemu Rai", position: "Office Assistant" },
-  { name: "Mr. Suhang Subba", position: "Office Assistant" },
-  { name: "Ms. Meena Pradhan", position: "Office Assistant" },
-  { name: "Mr. Pinkey Bhutia", position: "Office Assistant" },
-  { name: "Mr. Mahendra Hang Subba", position: "Office Attendant" },
-  { name: "Mrs. Binita Rai", position: "Office Attendant" },
-  { name: "Dr. Sangay Diki Bhutia", position: "Research Officer - I" },
-  { name: "Mrs. Margaret Lepcha", position: "Welfare Inspector" },
-  { name: "Mrs. Rhea Pradhan", position: "Welfare Inspector" },
-  { name: "Mr. Rahul Rai", position: "Lower Division Clerk" },
-  { name: "Mr. Purnimaya Subba", position: "Office Assistant" },
-  { name: "Mr. Kedar Nath Dhakal", position: "Office Assistant" },
-  { name: "Mr. Dawa Tshering Lepcha", position: "Office Attendant" },
-  { name: "Mr. Sanjay Kami", position: "Assistant Lineman" },
-  { name: "Mr. Sanejit Subba", position: "Safai Karmchari" },
-  { name: "Mr. Abhidan Subba", position: "Chowkidar" },
-  { name: "Mr. Sonam Chopel Sherpa", position: "Office Assistant" },
-  { name: "Mr. Laku Dorjee Tamang", position: "Safai Karmchari" },
-  { name: "Mr. Dependra Chettri", position: "Office Assistant" },
-  { name: "Mrs. Kamala Tamang", position: "Assistant Curator" },
-  { name: "Mr. Raju Chettri", position: "Chowkidar" },
-];
+interface StaffMember {
+  id: number;
+  name: string;
+  position: string;
+}
 
 function getBadgeStyle(position: string): React.CSSProperties {
   if (position.includes("Director") || position.includes("Secretary"))
@@ -94,8 +63,20 @@ const rowVariants: Variants = {
 
 export default function WhosWhoPage() {
   const [query, setQuery] = useState("");
+  const [staffList, setStaffList] = useState<StaffMember[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const filtered = STAFF.filter(
+  useEffect(() => {
+    fetch("/api/staff")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.success) setStaffList(d.data);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  const filtered = staffList.filter(
     (s) =>
       s.name.toLowerCase().includes(query.toLowerCase()) ||
       s.position.toLowerCase().includes(query.toLowerCase()),
@@ -130,12 +111,12 @@ export default function WhosWhoPage() {
               </span>
             </div>
             <h1 className="font-display font-bold text-white text-[clamp(26px,4vw,44px)] leading-tight tracking-tight mb-3">
-              Who's Who
+              Who&apos;s Who
             </h1>
             <div className="w-14 h-[3px] rounded-full bg-[#f4c430] mb-4" />
             <p className="text-white/65 text-[15px] max-w-xl leading-relaxed">
               Meet the dedicated team of officials and staff at the Tribal
-              Research Institute & Training Centre, Sikkim.
+              Research Institute &amp; Training Centre, Sikkim.
             </p>
 
             {/* Stats row */}
@@ -143,7 +124,7 @@ export default function WhosWhoPage() {
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-[#f4c430]" />
                 <span className="text-white/50 text-[12.5px]">
-                  {STAFF.length} Members
+                  {staffList.length} Members
                 </span>
               </div>
               <div className="flex items-center gap-2">
@@ -366,7 +347,7 @@ export default function WhosWhoPage() {
             transition={{ delay: 0.4 }}
             className="text-center text-[12.5px] text-[#1a1550]/35 mt-8"
           >
-            Showing {filtered.length} of {STAFF.length} staff members
+            Showing {filtered.length} of {staffList.length} staff members
           </motion.p>
         )}
       </div>

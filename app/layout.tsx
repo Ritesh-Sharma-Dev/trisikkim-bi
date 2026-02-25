@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Playfair_Display, Source_Serif_4 } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import Providers from "@/components/Providers";
+import LayoutShell from "@/components/LayoutShell";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -32,9 +32,9 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${playfair.variable} ${sourceSerif.variable}`}>
       <body className="antialiased min-h-screen flex flex-col bg-gray-50">
-        <Navbar />
-        <main className="flex-1">{children}</main>
-        <Footer />
+        <Providers>
+          <LayoutShell>{children}</LayoutShell>
+        </Providers>
       </body>
     </html>
   );

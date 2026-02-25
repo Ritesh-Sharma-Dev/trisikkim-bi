@@ -3,13 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import {
-  motion,
-  AnimatePresence,
-  useMotionValue,
-  useTransform,
-  Variants,
-} from "framer-motion";
+import { motion, AnimatePresence, Variants } from "framer-motion";
 import {
   ChevronLeft,
   ChevronRight,
@@ -22,68 +16,44 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export const SLIDES = [
+interface SlideData {
+  id: number;
+  image: string;
+  tag: string;
+  tagIcon: string;
+  headline: string;
+  subtext: string;
+  ctaLabel: string;
+  ctaHref: string;
+  accent: string;
+  statValue: string;
+  statLabel: string;
+}
+
+const TAG_ICONS: Record<string, React.ElementType> = {
+  Leaf,
+  MapPin,
+  BookOpen,
+  Users,
+  Award,
+};
+
+const FALLBACK_SLIDES: SlideData[] = [
   {
     id: 1,
     image: "/DJI_0057-scaled.jpg",
     tag: "Heritage & Culture",
-    tagIcon: Leaf,
+    tagIcon: "Leaf",
     headline: "Preserving the Living\nLegacy of Sikkim's Tribes",
     subtext:
       "Dedicated to the documentation, research, and celebration of the indigenous communities that define the cultural fabric of Sikkim.",
-    cta: { label: "Explore Tribes", href: "/tribes" },
+    ctaLabel: "Explore Tribes",
+    ctaHref: "/tribes",
     accent: "#f4c430",
-    stat: { value: "12+", label: "Tribal Communities" },
+    statValue: "12+",
+    statLabel: "Tribal Communities",
   },
-  {
-    id: 2,
-    image: "/WhatsApp-Image-2024.jpg",
-    tag: "Research & Documentation",
-    tagIcon: BookOpen,
-    headline: "Advancing Tribal\nKnowledge & Scholarship",
-    subtext:
-      "Conducting ground-breaking research on tribal languages, customs, folklore, and socio-economic conditions across Sikkim.",
-    cta: { label: "View Publications", href: "/about" },
-    accent: "#f4c430",
-    stat: { value: "200+", label: "Research Publications" },
-  },
-  {
-    id: 3,
-    image: "/1-4.jpg",
-    tag: "Training & Capacity Building",
-    tagIcon: Users,
-    headline: "Empowering Communities\nThrough Education",
-    subtext:
-      "Running intensive training programmes and workshops that equip tribal youth with skills for sustainable livelihoods.",
-    cta: { label: "Training Programmes", href: "/updates/training-workshop" },
-    accent: "#f4c430",
-    stat: { value: "5000+", label: "Beneficiaries Trained" },
-  },
-  {
-    id: 4,
-    image: "/gate.png",
-    tag: "Awards & Recognition",
-    tagIcon: Award,
-    headline: "Celebrating Excellence\nin Tribal Welfare",
-    subtext:
-      "Honouring outstanding contributions to tribal development, art, and culture through institutional awards and recognition.",
-    cta: { label: "News & Events", href: "/updates/news-events" },
-    accent: "#f4c430",
-    stat: { value: "30+", label: "Years of Service" },
-  },
-  {
-    id: 5,
-    image: "/air.png",
-    tag: "Sikkim's Sacred Landscape",
-    tagIcon: MapPin,
-    headline: "Rooted in the Mountains,\nRich in Tradition",
-    subtext:
-      "From the alpine peaks to the river valleys, the tribal heritage of Sikkim is as vast and profound as its natural landscape.",
-    cta: { label: "Gallery", href: "/gallery" },
-    accent: "#f4c430",
-    stat: { value: "Sikkim", label: "The Organic State" },
-  },
-] as const;
+];
 
 const INTERVAL = 5500;
 
@@ -120,6 +90,7 @@ const fadeLeft: Variants = {
 };
 
 export default function HeroCarousel() {
+  const [slides, setSlides] = useState<SlideData[]>(FALLBACK_SLIDES);
   const [current, setCurrent] = useState(0);
   const [direction, setDirection] = useState(1);
   const [paused, setPaused] = useState(false);
@@ -127,7 +98,17 @@ export default function HeroCarousel() {
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const progressRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const slide = SLIDES[current];
+  useEffect(() => {
+    fetch("/api/hero-slides")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.success && d.data.length > 0) setSlides(d.data);
+      })
+      .catch(() => {});
+  }, []);
+
+  const slide = slides[current] || slides[0];
+  const TagIcon = TAG_ICONS[slide.tagIcon] || Leaf;
 
   const goTo = useCallback((idx: number, dir: number) => {
     setDirection(dir);
@@ -136,12 +117,12 @@ export default function HeroCarousel() {
   }, []);
 
   const next = useCallback(() => {
-    goTo((current + 1) % SLIDES.length, 1);
-  }, [current, goTo]);
+    goTo((current + 1) % slides.length, 1);
+  }, [current, slides.length, goTo]);
 
   const prev = useCallback(() => {
-    goTo((current - 1 + SLIDES.length) % SLIDES.length, -1);
-  }, [current, goTo]);
+    goTo((current - 1 + slides.length) % slides.length, -1);
+  }, [current, slides.length, goTo]);
 
   useEffect(() => {
     if (paused) return;
@@ -236,7 +217,7 @@ export default function HeroCarousel() {
                     color: "#f4c430",
                   }}
                 >
-                  <slide.tagIcon className="w-3 h-3" />
+                  <TagIcon className="w-3 h-3" />
                   {slide.tag}
                 </div>
               </motion.div>
@@ -268,14 +249,14 @@ export default function HeroCarousel() {
                 className="flex items-center gap-4 flex-wrap"
               >
                 <Link
-                  href={slide.cta.href}
+                  href={slide.ctaHref}
                   className="group flex items-center gap-2 px-6 py-3 rounded-lg text-[14px] font-semibold tracking-wide transition-all duration-300 shadow-lg hover:scale-105"
                   style={{
                     background: "#f4c430",
                     color: "#1077A6",
                   }}
                 >
-                  {slide.cta.label}
+                  {slide.ctaLabel}
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" />
                 </Link>
 
@@ -285,10 +266,10 @@ export default function HeroCarousel() {
                       className="text-white font-display font-bold text-[22px] leading-none"
                       style={{ color: "#f4c430" }}
                     >
-                      {slide.stat.value}
+                      {slide.statValue}
                     </div>
                     <div className="text-white/55 text-[11px] tracking-wide mt-0.5">
-                      {slide.stat.label}
+                      {slide.statLabel}
                     </div>
                   </div>
                 </div>
@@ -336,7 +317,7 @@ export default function HeroCarousel() {
 
         <div className="max-w-7xl mx-auto px-6 md:px-10 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            {SLIDES.map((s, i) => (
+            {slides.map((s, i) => (
               <button
                 key={s.id}
                 onClick={() => goTo(i, i > current ? 1 : -1)}
@@ -360,7 +341,7 @@ export default function HeroCarousel() {
           <div className="flex items-center gap-4">
             <span className="text-white/40 text-[12px] font-mono tracking-widest hidden sm:block">
               {String(current + 1).padStart(2, "0")} /{" "}
-              {String(SLIDES.length).padStart(2, "0")}
+              {String(slides.length).padStart(2, "0")}
             </span>
 
             <div className="flex gap-2">
@@ -372,7 +353,7 @@ export default function HeroCarousel() {
       </div>
 
       <div className="absolute right-6 top-1/2 -translate-y-1/2 hidden xl:flex flex-col gap-2">
-        {SLIDES.map((s, i) => (
+        {slides.map((s, i) => (
           <button
             key={s.id}
             onClick={() => goTo(i, i > current ? 1 : -1)}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   Phone,
@@ -25,6 +25,10 @@ const fadeUp = {
 /* ═══════════════════════════════════════════════════════════════════
    CONTACT PAGE
 ═══════════════════════════════════════════════════════════════════ */
+const DEFAULT_PHONE = "+91 7602569556";
+const DEFAULT_EMAIL = "tribalresearchinst@gmail.com";
+const DEFAULT_ADDRESS = "Assam Lingzey Rd, Chota Singtam, Sikkim 737135";
+
 export default function ContactPage() {
   const [form, setForm] = useState({
     firstName: "",
@@ -33,15 +37,58 @@ export default function ContactPage() {
     message: "",
   });
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+
+  // Dynamic contact info from settings
+  const [contactPhone, setContactPhone] = useState(DEFAULT_PHONE);
+  const [contactEmail, setContactEmail] = useState(DEFAULT_EMAIL);
+  const [contactAddress, setContactAddress] = useState(DEFAULT_ADDRESS);
+
+  useEffect(() => {
+    fetch("/api/settings")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.success && d.data) {
+          const s = d.data as Record<string, string>;
+          if (s.footer_phone) setContactPhone(s.footer_phone);
+          if (s.footer_email) setContactEmail(s.footer_email);
+          if (s.footer_address) setContactAddress(s.footer_address);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => setForm({ ...form, [e.target.name]: e.target.value });
 
-  const handleSubmit = (e: React.MouseEvent) => {
+  const handleSubmit = async (e: React.MouseEvent) => {
     e.preventDefault();
-    if (form.firstName && form.email && form.message) {
-      setSubmitted(true);
+    if (!form.firstName || !form.email || !form.message) return;
+    setSubmitting(true);
+    setError("");
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          firstName: form.firstName,
+          lastName: form.lastName,
+          email: form.email,
+          message: form.message,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSubmitted(true);
+      } else {
+        setError(data.error || "Failed to send message.");
+      }
+    } catch {
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -137,19 +184,19 @@ export default function ContactPage() {
               {
                 icon: Phone,
                 label: "Call Us",
-                value: "+91 7602569556",
-                href: "tel:+917602569556",
+                value: contactPhone,
+                href: `tel:${contactPhone.replace(/\s/g, "")}`,
               },
               {
                 icon: AtSign,
                 label: "Write to Us",
-                value: "tribalresearchinst@gmail.com",
-                href: "mailto:tribalresearchinst@gmail.com",
+                value: contactEmail,
+                href: `mailto:${contactEmail}`,
               },
               {
                 icon: MapPin,
                 label: "Visit Us",
-                value: "Assam Lingzey Rd, Chota Singtam, Sikkim 737135",
+                value: contactAddress,
                 href: "https://maps.google.com/?q=27.2841523,88.6233368",
               },
             ].map((item, i) => (
@@ -364,10 +411,10 @@ export default function ContactPage() {
             <p className="text-[#1a1550]/65 text-[13px] leading-relaxed">
               For urgent matters, please call us directly at{" "}
               <a
-                href="tel:+917602569556"
+                href={`tel:${contactPhone.replace(/\s/g, "")}`}
                 className="font-semibold text-[#1077A6] hover:underline"
               >
-                +91 7602569556
+                {contactPhone}
               </a>{" "}
               during office hours (Monday–Friday, 10:00 AM – 5:00 PM).
             </p>

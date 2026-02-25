@@ -1,59 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ChevronLeft, ChevronRight, ZoomIn, Images } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-/* ─── Gallery data ───────────────────────────────────────────────────── */
-/*
-  Drop images into:
-    /public/gallery/tribal-festivals/   → tf-01.jpg … tf-06.jpg
-    /public/gallery/exchange-visit/     → ev-01.jpg … ev-27.jpg
-    /public/gallery/janjatiya-gaurav/   → jg-01.jpg … jg-10.jpg
-*/
+interface GalleryImage {
+  id: number;
+  src: string;
+  alt: string;
+  sortOrder: number;
+}
 
-const SECTIONS = [
-  {
-    id: "tribal-festivals",
-    label: "01",
-    title: "Tribal Festivals",
-    description:
-      "A vibrant showcase of the rich cultural heritage and age-old traditions celebrated by the tribal communities of Sikkim.",
-    accent: "#f4c430", // Changed to secondary
-    images: Array.from({ length: 6 }, (_, i) => ({
-      src: `/gallery/tribal-festivals/tri-${String(i + 1).padStart(2, "0")}.png`,
-      alt: `Tribal Festival ${i + 1}`,
-    })),
-  },
-  {
-    id: "exchange-visit",
-    label: "02",
-    title: "Exchange of Visit by the Tribal Community of Sikkim",
-    description:
-      "Exchange of visit by the tribals to learn more about the socio-economic development achieved by the best performing states in the country.",
-    accent: "#f4c430", // Changed to secondary
-    images: Array.from({ length: 29 }, (_, i) => ({
-      src: `/gallery/exchange-visit/ev-${String(i + 1).padStart(2, "0")}.jpg`,
-      alt: `Exchange Visit ${i + 1}`,
-    })),
-  },
-  {
-    id: "janjatiya-gaurav",
-    label: "03",
-    title: "Janjatiya Gaurav Divas",
-    description:
-      "Celebrating the Glorious Tribal freedom fighters of India on the occasion of Bhagwan Birsa Munda's Birth Anniversary observed on 15th November, 2022.",
-    accent: "#f4c430", // Changed to secondary
-    images: Array.from({ length: 12 }, (_, i) => ({
-      src: `/gallery/janjatiya-gaurav/jg-${String(i + 1).padStart(2, "0")}.jpg`,
-      alt: `Janjatiya Gaurav Divas ${i + 1}`,
-    })),
-  },
-] as const;
-
-type SectionId = (typeof SECTIONS)[number]["id"];
+interface GallerySection {
+  id: number;
+  name: string;
+  slug: string;
+  description: string | null;
+  images: GalleryImage[];
+}
 
 /* ─── Framer variants ────────────────────────────────────────────────── */
 const fadeUp = {
@@ -94,12 +60,24 @@ const lightboxImg = {
    GALLERY PAGE
 ═══════════════════════════════════════════════════════════════════════ */
 export default function GalleryPage() {
+  const [sections, setSections] = useState<GallerySection[]>([]);
+  const [loading, setLoading] = useState(true);
   const [lightbox, setLightbox] = useState<{
     sectionIdx: number;
     imgIdx: number;
   } | null>(null);
 
-  const [activeSection, setActiveSection] = useState<SectionId | "all">("all");
+  const [activeSection, setActiveSection] = useState<string>("all");
+
+  useEffect(() => {
+    fetch("/api/gallery")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.success) setSections(d.data);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
 
   const openLightbox = (sectionIdx: number, imgIdx: number) =>
     setLightbox({ sectionIdx, imgIdx });
@@ -108,7 +86,7 @@ export default function GalleryPage() {
 
   const lightboxNext = () => {
     if (!lightbox) return;
-    const section = SECTIONS[lightbox.sectionIdx];
+    const section = sections[lightbox.sectionIdx];
     setLightbox({
       ...lightbox,
       imgIdx: (lightbox.imgIdx + 1) % section.images.length,
@@ -117,7 +95,7 @@ export default function GalleryPage() {
 
   const lightboxPrev = () => {
     if (!lightbox) return;
-    const section = SECTIONS[lightbox.sectionIdx];
+    const section = sections[lightbox.sectionIdx];
     setLightbox({
       ...lightbox,
       imgIdx:
@@ -127,11 +105,11 @@ export default function GalleryPage() {
 
   const visibleSections =
     activeSection === "all"
-      ? SECTIONS
-      : SECTIONS.filter((s) => s.id === activeSection);
+      ? sections
+      : sections.filter((s) => s.slug === activeSection);
 
   const currentLightboxImage = lightbox
-    ? SECTIONS[lightbox.sectionIdx].images[lightbox.imgIdx]
+    ? sections[lightbox.sectionIdx]?.images[lightbox.imgIdx]
     : null;
 
   return (
@@ -173,7 +151,7 @@ export default function GalleryPage() {
 
             {/* Section stats */}
             <div className="flex flex-wrap items-center gap-5 mt-6">
-              {SECTIONS.map((s) => (
+              {sections.map((s) => (
                 <div key={s.id} className="flex items-center gap-2">
                   <span
                     className="w-2 h-2 rounded-full"
@@ -187,7 +165,7 @@ export default function GalleryPage() {
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-white/30" />
                 <span className="text-white/50 text-[12.5px]">
-                  {SECTIONS.reduce((a, s) => a + s.images.length, 0)} total
+                  {sections.reduce((a, s) => a + s.images.length, 0)} total
                 </span>
               </div>
             </div>
@@ -206,14 +184,14 @@ export default function GalleryPage() {
             >
               All Sections
             </FilterTab>
-            {SECTIONS.map((s) => (
+            {sections.map((s) => (
               <FilterTab
                 key={s.id}
-                active={activeSection === s.id}
-                onClick={() => setActiveSection(s.id as SectionId)}
+                active={activeSection === s.slug}
+                onClick={() => setActiveSection(s.slug)}
                 accent="#f4c430"
               >
-                {s.title.length > 28 ? s.title.slice(0, 28) + "…" : s.title}
+                {s.name.length > 28 ? s.name.slice(0, 28) + "…" : s.name}
               </FilterTab>
             ))}
           </div>
@@ -222,17 +200,25 @@ export default function GalleryPage() {
 
       {/* ── Sections ── */}
       <div className="max-w-7xl mx-auto px-4 md:px-8 py-12 space-y-20">
-        {visibleSections.map((section, sIdx) => {
-          const realSectionIdx = SECTIONS.findIndex((s) => s.id === section.id);
-          return (
-            <GallerySection
-              key={section.id}
-              section={section}
-              sectionIdx={realSectionIdx}
-              onOpen={openLightbox}
-            />
-          );
-        })}
+        {loading ? (
+          <div className="text-center text-[#1a1550]/40 py-20">
+            Loading gallery...
+          </div>
+        ) : (
+          visibleSections.map((section) => {
+            const realSectionIdx = sections.findIndex(
+              (s) => s.id === section.id,
+            );
+            return (
+              <GallerySection
+                key={section.id}
+                section={section}
+                sectionIdx={realSectionIdx}
+                onOpen={openLightbox}
+              />
+            );
+          })
+        )}
       </div>
 
       {/* ── Lightbox ── */}
@@ -258,7 +244,7 @@ export default function GalleryPage() {
             {/* Counter */}
             <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-white/10 border border-white/15 text-white text-[12px] px-3 py-1 rounded-full font-mono tracking-widest">
               {String(lightbox.imgIdx + 1).padStart(2, "0")} /{" "}
-              {String(SECTIONS[lightbox.sectionIdx].images.length).padStart(
+              {String(sections[lightbox.sectionIdx].images.length).padStart(
                 2,
                 "0",
               )}
@@ -297,7 +283,7 @@ export default function GalleryPage() {
                 {/* Caption */}
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-5">
                   <p className="text-white font-medium text-sm">
-                    {SECTIONS[lightbox.sectionIdx].title}
+                    {sections[lightbox.sectionIdx].name}
                   </p>
                   <p className="text-white/60 text-[12px] mt-0.5">
                     {currentLightboxImage.alt}
@@ -330,7 +316,7 @@ function GallerySection({
   sectionIdx,
   onOpen,
 }: {
-  section: (typeof SECTIONS)[number];
+  section: GallerySection;
   sectionIdx: number;
   onOpen: (si: number, ii: number) => void;
 }) {
@@ -342,7 +328,7 @@ function GallerySection({
   const hasMore = section.images.length > PREVIEW_COUNT;
 
   return (
-    <div id={section.id}>
+    <div id={section.slug}>
       {/* Section header */}
       <motion.div
         variants={fadeUp}
@@ -361,12 +347,12 @@ function GallerySection({
               borderColor: "#1077A630",
             }}
           >
-            {section.label}
+            {String(sectionIdx + 1).padStart(2, "0")}
           </div>
 
           <div className="flex-1 min-w-0">
             <h2 className="font-display font-bold text-[#1a1550] text-[clamp(18px,2.5vw,26px)] leading-tight tracking-tight">
-              {section.title}
+              {section.name}
             </h2>
             <div
               className="w-10 h-[3px] rounded-full mt-2 mb-3"
@@ -441,7 +427,6 @@ function GallerySection({
         </AnimatePresence>
       </div>
 
-    
       {hasMore && (
         <motion.div
           initial={{ opacity: 0 }}
@@ -488,7 +473,6 @@ function GallerySection({
     </div>
   );
 }
-
 
 function FilterTab({
   children,

@@ -1,11 +1,12 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, Variants } from "framer-motion";
 import { ExternalLink, Users, Clock, Eye } from "lucide-react";
 
-const RELATED_LINKS = [
+const DEFAULT_LINKS = [
   { label: "National Tribal Research Portal", href: "https://tribal.nic.in" },
   {
     label: "Ministry of Tribal Affairs – Govt. of India",
@@ -19,11 +20,6 @@ const RELATED_LINKS = [
     href: "https://socialwelfaresikkim.gov.in",
   },
 ];
-
-const SITE_INFO = {
-  visitors: "24,550",
-  lastUpdated: "February 11, 2026 at 4:13 am",
-};
 
 const CENTER_LOGO = { src: "/logos/tritc-logo.png", alt: "TRITC Sikkim" };
 
@@ -46,6 +42,40 @@ const linkVariant: Variants = {
 };
 
 export default function Footer() {
+  const [visitors, setVisitors] = useState("—");
+  const [lastUpdated, setLastUpdated] = useState("—");
+  const [relatedLinks, setRelatedLinks] = useState(DEFAULT_LINKS);
+
+  useEffect(() => {
+    // Load settings (Record<string, string>)
+    fetch("/api/settings")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.success && d.data && typeof d.data === "object") {
+          const s = d.data as Record<string, string>;
+          if (s.visitors_count)
+            setVisitors(Number(s.visitors_count).toLocaleString("en-IN"));
+          if (s.footer_links) {
+            try {
+              const parsed = JSON.parse(s.footer_links);
+              if (Array.isArray(parsed)) setRelatedLinks(parsed);
+            } catch {
+              /* keep defaults */
+            }
+          }
+        }
+      })
+      .catch(() => {});
+
+    // Auto last-updated from DB
+    fetch("/api/settings/last-updated")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.success && d.date) setLastUpdated(d.date);
+      })
+      .catch(() => {});
+  }, []);
+
   return (
     <>
       <div
@@ -73,7 +103,7 @@ export default function Footer() {
           >
             <SectionHeading>Related Links</SectionHeading>
             <ul className="mt-5 space-y-[10px]">
-              {RELATED_LINKS.map((link, i) => (
+              {relatedLinks.map((link, i) => (
                 <motion.li
                   key={link.label}
                   custom={i}
@@ -145,13 +175,13 @@ export default function Footer() {
               <InfoRow
                 icon={<Users className="w-4 h-4" />}
                 label="Number of Visitors"
-                value={SITE_INFO.visitors}
+                value={visitors}
               />
 
               <InfoRow
                 icon={<Clock className="w-4 h-4" />}
                 label="Last Updated"
-                value={SITE_INFO.lastUpdated}
+                value={lastUpdated}
               />
 
               <div className="flex items-center gap-3 group">

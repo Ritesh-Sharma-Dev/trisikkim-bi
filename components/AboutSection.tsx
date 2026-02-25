@@ -1,27 +1,17 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { motion, Variants } from "framer-motion";
 import { ArrowRight, MapPin, Building2, Mountain, Users } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 
-const DIGNITARIES = [
-  {
-    name: "Shri Om Prakash Mathur",
-    role: "Hon'ble Governor",
-    image: "/governor.jpg",
-  },
-  {
-    name: "Shri Prem Singh Tamang",
-    role: "Hon'ble Chief Minister",
-    image: "/cm.jpg",
-  },
-  {
-    name: "Shri Samdup Lepcha",
-    role: "Hon'ble Minister",
-    image: "/Sandup-Sir.jpg",
-  },
-];
+interface Dignitary {
+  id: number;
+  name: string;
+  role: string;
+  image: string;
+}
 
 const SIKKIM_FACTS = [
   { icon: MapPin, value: "7,096 km²", label: "Total Area" },
@@ -58,6 +48,17 @@ const fadeRight: Variants = {
 };
 
 export default function AboutSection() {
+  const [dignitaries, setDignitaries] = useState<Dignitary[]>([]);
+
+  useEffect(() => {
+    fetch("/api/dignitaries")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.success) setDignitaries(d.data);
+      })
+      .catch(() => {});
+  }, []);
+
   return (
     <section className="bg-white font-body">
       <div className="bg-gradient-to-b from-[#f4f3fb] to-white border-b border-[#322880]/8">
@@ -73,7 +74,7 @@ export default function AboutSection() {
           </motion.p>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-3xl mx-auto">
-            {DIGNITARIES.map((person, i) => (
+            {dignitaries.map((person, i) => (
               <motion.div
                 key={person.name}
                 custom={i}

@@ -2,6 +2,8 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
+@plugin "@tailwindcss/typography";
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -123,4 +125,95 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* ── Accessibility Modes ─────────────────────────────────────────────── */
+
+/* ── Font size steps (applied on <html>) ─────── */
+/* Changing html font-size scales all rem-based sizes site-wide */
+html.a11y-text-1 {
+  font-size: 112.5% !important;
+}
+html.a11y-text-2 {
+  font-size: 125% !important;
+}
+html.a11y-text-3 {
+  font-size: 137.5% !important;
+}
+html.a11y-text-4 {
+  font-size: 150% !important;
+}
+
+/* ── Line spacing ────────────────────────────── */
+html.a11y-line-relaxed *:not(script):not(style) {
+  line-height: 1.9 !important;
+}
+html.a11y-line-loose *:not(script):not(style) {
+  line-height: 2.4 !important;
+}
+
+/* ── Letter spacing ──────────────────────────── */
+html.a11y-letters-wide *:not(script):not(style) {
+  letter-spacing: 0.06em !important;
+}
+html.a11y-letters-wider *:not(script):not(style) {
+  letter-spacing: 0.12em !important;
+}
+
+/* ── High contrast ───────────────────────────── */
+html.a11y-contrast {
+  filter: contrast(1.5);
+}
+
+/* ── Grayscale ───────────────────────────────── */
+html.a11y-grayscale {
+  filter: grayscale(1);
+}
+
+/* ── Invert colours ──────────────────────────── */
+html.a11y-invert {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+/* ── Compound filters ────────────────────────── */
+html.a11y-contrast.a11y-grayscale {
+  filter: contrast(1.5) grayscale(1);
+}
+html.a11y-contrast.a11y-invert {
+  filter: contrast(1.5) invert(1) hue-rotate(180deg);
+}
+html.a11y-grayscale.a11y-invert {
+  filter: grayscale(1) invert(1) hue-rotate(180deg);
+}
+html.a11y-contrast.a11y-grayscale.a11y-invert {
+  filter: contrast(1.5) grayscale(1) invert(1) hue-rotate(180deg);
+}
+
+/* ── Highlight links ─────────────────────────── */
+html.a11y-links a,
+html.a11y-links a:visited {
+  background-color: #f4c430 !important;
+  color: #1a1550 !important;
+  padding: 0 3px !important;
+  border-radius: 2px !important;
+  text-decoration: underline !important;
+  text-underline-offset: 2px !important;
+}
+
+/* ── Enhanced focus rings ────────────────────── */
+html.a11y-focus *:focus-visible {
+  outline: 3px solid #1077a6 !important;
+  outline-offset: 4px !important;
+  border-radius: 4px !important;
+  box-shadow: 0 0 0 6px rgba(16, 119, 166, 0.2) !important;
+}
+
+/* ── Reduce motion ───────────────────────────── */
+html.a11y-no-motion *,
+html.a11y-no-motion *::before,
+html.a11y-no-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
 }
