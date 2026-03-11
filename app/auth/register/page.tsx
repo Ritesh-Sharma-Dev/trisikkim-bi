@@ -101,7 +101,7 @@ export default function RegisterPage() {
     }
   };
 
-  // Loading
+  // Loadings
   if (registrationEnabled === null) {
     return (
       <div className="min-h-[100dvh] flex items-center justify-center bg-white">
