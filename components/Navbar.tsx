@@ -152,19 +152,8 @@ export default function Navbar() {
         </Link>
       </div>
 
-      <div className="relative overflow-hidden bg-white border-b border-[#322880]/10 py-4 px-4 md:px-8">
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            backgroundImage: "url('/lepchapattern.png')",
-            backgroundRepeat: "repeat",
-            backgroundSize: "auto",
-            backgroundPosition: "0 0",
-            opacity: 0.1,
-          }}
-        />
-
-        <div className="max-w-7xl mx-auto relative z-10">
+      <div className="bg-white border-b border-[#322880]/10 py-4 px-4 md:px-8">
+        <div className="max-w-7xl mx-auto">
           <div className="hidden md:flex items-center justify-between">
             <div className="flex items-center gap-4">
               {LOGOS.map((logo) => (
@@ -234,6 +223,17 @@ export default function Navbar() {
           </div>
         </div>
       </div>
+
+      <div
+        className="w-full h-[12px] md:h-[24px] pointer-events-none"
+        style={{
+          backgroundImage: "url('/main-tri.png')",
+          backgroundRepeat: "repeat-x",
+          backgroundSize: "auto 100%",
+          backgroundPosition: "center center",
+          backgroundBlendMode: "normal",
+        }}
+      />
 
       <nav className="bg-[#1077A6] w-full">
         <div className="max-w-7xl mx-auto px-4 md:px-8">

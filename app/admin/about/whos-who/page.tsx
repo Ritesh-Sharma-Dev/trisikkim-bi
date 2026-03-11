@@ -1,14 +1,23 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { AlertCircle, Save } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { AlertCircle, Save, CheckCircle2, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
+
+const inputCls =
+  "h-9 text-xs border-[#1077a6]/[0.15] rounded-lg focus:border-[#1077a6] focus:ring-1 focus:ring-[#1077a6]/10 text-[#1a1550] placeholder:text-[#1a1550]/20";
+const labelCls = "text-[11px] font-medium text-[#1a1550]/40 mb-1 block";
 
 export default function WhosWhoAdmin() {
-  const [bannerTitle, setBannerTitle] = useState("");
-  const [bannerSubtitle, setBannerSubtitle] = useState("");
+  const [title, setTitle] = useState("");
+  const [subtitle, setSubtitle] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     fetch("/api/pages/about-whos-who")
@@ -16,100 +25,117 @@ export default function WhosWhoAdmin() {
       .then((res) => {
         if (res.success && res.data?.content) {
           const c = res.data.content as Record<string, unknown>;
-          if (typeof c.bannerTitle === "string") setBannerTitle(c.bannerTitle);
+          if (typeof c.bannerTitle === "string") setTitle(c.bannerTitle);
           if (typeof c.bannerSubtitle === "string")
-            setBannerSubtitle(c.bannerSubtitle);
+            setSubtitle(c.bannerSubtitle);
         }
       })
-      .catch(() => setError("Failed to load data."))
+      .catch(() => setError("Failed to load."))
       .finally(() => setLoading(false));
   }, []);
 
   const handleSave = async () => {
     setError("");
     setSuccess("");
+    setSaving(true);
     try {
-      const res = await fetch("/api/pages/about-whos-who", {
+      const r = await fetch("/api/pages/about-whos-who", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title: "Who's Who",
-          content: { bannerTitle, bannerSubtitle },
+          content: { bannerTitle: title, bannerSubtitle: subtitle },
         }),
       });
-      const data = await res.json();
-      if (data.success) {
-        setSuccess("Saved successfully!");
+      const d = await r.json();
+      if (d.success) {
+        setSuccess("Saved!");
         setTimeout(() => setSuccess(""), 3000);
-      } else setError(data.error);
+      } else setError(d.error);
     } catch {
       setError("Failed to save.");
+    } finally {
+      setSaving(false);
     }
   };
 
   if (loading)
     return (
-      <div className="bg-white rounded-xl border p-8 text-center text-[#1a1550]/50">
-        Loading...
+      <div className="flex items-center justify-center py-16">
+        <Loader2 className="w-5 h-5 text-[#1077a6] animate-spin" />
       </div>
     );
 
   return (
-    <div className="space-y-6">
-      {error && (
-        <div className="flex items-center gap-2 bg-red-50 text-red-700 rounded-lg p-3 text-sm border border-red-200">
-          <AlertCircle className="w-4 h-4" /> {error}
-        </div>
-      )}
-      {success && (
-        <div className="flex items-center gap-2 bg-green-50 text-green-700 rounded-lg p-3 text-sm border border-green-200">
-          <Save className="w-4 h-4" /> {success}
-        </div>
-      )}
+    <motion.div
+      className="space-y-3 max-w-2xl"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+    >
+      <AnimatePresence>
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="flex items-center gap-2 bg-red-50 text-red-600 rounded-lg p-2.5 text-xs border border-red-100"
+          >
+            <AlertCircle className="w-3.5 h-3.5" /> {error}
+          </motion.div>
+        )}
+        {success && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="flex items-center gap-2 bg-emerald-50 text-emerald-600 rounded-lg p-2.5 text-xs border border-emerald-100"
+          >
+            <CheckCircle2 className="w-3.5 h-3.5" /> {success}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      {/* ── Banner ── */}
-      <div className="bg-white rounded-xl border border-[#1077A6]/10 p-6 space-y-4">
-        <h3 className="font-display font-bold text-[#1a1550] text-lg">
-          Banner
-        </h3>
-        <div>
-          <label className="block text-xs font-semibold text-[#1a1550]/60 mb-1">
-            Banner Title
-          </label>
-          <input
-            type="text"
-            value={bannerTitle}
-            onChange={(e) => setBannerTitle(e.target.value)}
-            placeholder="e.g. Who's Who"
-            className="w-full border border-[#1077A6]/15 rounded-lg px-3 py-2 text-sm text-[#1a1550] focus:border-[#1077A6] outline-none"
-          />
-        </div>
-        <div>
-          <label className="block text-xs font-semibold text-[#1a1550]/60 mb-1">
-            Banner Subtitle
-          </label>
-          <input
-            type="text"
-            value={bannerSubtitle}
-            onChange={(e) => setBannerSubtitle(e.target.value)}
-            placeholder="Short description shown under the title"
-            className="w-full border border-[#1077A6]/15 rounded-lg px-3 py-2 text-sm text-[#1a1550] focus:border-[#1077A6] outline-none"
-          />
-        </div>
-        <p className="text-xs text-[#1a1550]/40">
-          Staff listing is managed under the Staff section.
-        </p>
-      </div>
+      <Card className="border-[#1077a6]/[0.12]">
+        <CardContent className="p-4 space-y-3">
+          <p className="text-sm font-bold text-[#1a1550]">Banner</p>
+          <div>
+            <label className={labelCls}>Title</label>
+            <Input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Who's Who"
+              className={inputCls}
+            />
+          </div>
+          <div>
+            <label className={labelCls}>Subtitle</label>
+            <Input
+              value={subtitle}
+              onChange={(e) => setSubtitle(e.target.value)}
+              className={inputCls}
+            />
+          </div>
+          <p className="text-[10px] text-[#1a1550]/25">
+            Staff listing managed under Staff section.
+          </p>
+        </CardContent>
+      </Card>
 
-      {/* ── Save Button ── */}
       <div className="flex justify-end">
-        <button
+        <Button
+          size="sm"
           onClick={handleSave}
-          className="flex items-center gap-2 bg-[#1077A6] text-white px-6 py-2.5 rounded-lg text-sm font-semibold hover:bg-[#0e6590]"
+          disabled={saving}
+          className="h-8 text-xs gap-1.5 bg-[#1077a6] hover:bg-[#1077a6]/90 rounded-lg"
         >
-          <Save className="w-4 h-4" /> Save
-        </button>
+          {saving ? (
+            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+          ) : (
+            <Save className="w-3.5 h-3.5" />
+          )}{" "}
+          Save
+        </Button>
       </div>
-    </div>
+    </motion.div>
   );
 }

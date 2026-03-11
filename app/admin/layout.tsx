@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard,
   Image as ImageIcon,
@@ -18,10 +19,13 @@ import {
   Award,
   Presentation,
   BookOpen,
+  Loader2,
+  ExternalLink,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-const SIDEBAR_ITEMS = [
+const NAV = [
   { label: "Dashboard", href: "/admin", icon: LayoutDashboard, exact: true },
   { label: "Hero Slides", href: "/admin/hero-slides", icon: Presentation },
   { label: "Dignitaries", href: "/admin/dignitaries", icon: Award },
@@ -42,143 +46,171 @@ export default function AdminLayout({
   const { data: session, status } = useSession();
   const router = useRouter();
   const pathname = usePathname();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/auth/login");
-    }
+    if (status === "unauthenticated") router.push("/auth/login");
   }, [status, router]);
+
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
 
   if (status === "loading") {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f8f7fc]">
-        <div className="text-[#1077A6] text-lg font-semibold">Loading...</div>
+      <div className="min-h-[100dvh] flex items-center justify-center bg-white">
+        <Loader2 className="w-5 h-5 text-[#1077a6] animate-spin" />
       </div>
     );
   }
 
-  if (!session?.user) {
-    return null;
-  }
+  if (!session?.user) return null;
+
+  const current =
+    NAV.find((n) =>
+      n.exact
+        ? pathname === n.href
+        : pathname === n.href || pathname.startsWith(n.href),
+    )?.label || "Dashboard";
 
   return (
-    <div className="min-h-screen bg-[#f8f7fc] flex font-body">
-      {/* Mobile overlay */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
+    <div className="min-h-[100dvh] bg-white flex">
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 lg:hidden"
+            onClick={() => setOpen(false)}
+          />
+        )}
+      </AnimatePresence>
 
-      {/* Sidebar */}
       <aside
         className={cn(
-          "fixed lg:sticky top-0 left-0 h-screen w-64 bg-[#1a1550] text-white z-50 flex flex-col transition-transform duration-300 lg:translate-x-0",
-          sidebarOpen ? "translate-x-0" : "-translate-x-full",
+          "fixed lg:sticky top-0 left-0 h-[100dvh] w-[230px] bg-white border-r border-[#1077a6]/10 z-50 flex flex-col transition-transform duration-300 lg:translate-x-0",
+          open ? "translate-x-0" : "-translate-x-full",
         )}
       >
-        <div className="p-5 border-b border-white/10">
-          <h2 className="font-display font-bold text-lg text-[#f4c430]">
-            TRITC Admin
-          </h2>
-          <p className="text-white/40 text-xs mt-1">Content Management</p>
+        <button
+          onClick={() => setOpen(false)}
+          className="lg:hidden absolute top-3 right-3 p-1 rounded-md hover:bg-[#1077a6]/5 text-[#1a1550]/40"
+        >
+          <X className="w-4 h-4" />
+        </button>
+
+        <div className="px-4 py-4 border-b border-[#1077a6]/8">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-[#1077a6] flex items-center justify-center shrink-0">
+              <span className="text-white font-extrabold text-[10px]">T</span>
+            </div>
+            <div>
+              <p className="text-sm font-bold text-[#1a1550] leading-none">
+                TRITC
+              </p>
+              <p className="text-[9px] text-[#1a1550]/30 leading-none mt-0.5">
+                Admin Panel
+              </p>
+            </div>
+          </div>
         </div>
 
-        <nav className="flex-1 overflow-y-auto py-3">
-          {SIDEBAR_ITEMS.map((item) => {
-            const isActive = item.exact
+        <nav className="flex-1 overflow-y-auto py-2 px-2.5">
+          {NAV.map((item) => {
+            const active = item.exact
               ? pathname === item.href
               : pathname === item.href || pathname.startsWith(item.href);
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                onClick={() => setSidebarOpen(false)}
                 className={cn(
-                  "flex items-center gap-3 px-5 py-3 text-sm font-medium transition-all duration-200 group",
-                  isActive
-                    ? "bg-[#1077A6] text-white border-r-3 border-[#f4c430]"
-                    : "text-white/60 hover:bg-white/5 hover:text-white",
+                  "flex items-center gap-2.5 px-3 py-2 text-[12px] font-medium rounded-lg my-0.5 transition-all group",
+                  active
+                    ? "bg-[#1077a6] text-white shadow-sm shadow-[#1077a6]/20"
+                    : "text-[#1a1550]/50 hover:text-[#1a1550] hover:bg-[#1077a6]/[0.05]",
                 )}
               >
                 <item.icon
                   className={cn(
-                    "w-4 h-4 flex-shrink-0",
-                    isActive
+                    "w-4 h-4 shrink-0 transition-colors",
+                    active
                       ? "text-[#f4c430]"
-                      : "text-white/40 group-hover:text-white/70",
+                      : "text-[#1077a6]/40 group-hover:text-[#1077a6]",
                   )}
                 />
-                <span>{item.label}</span>
-                {isActive && (
-                  <ChevronRight className="w-3 h-3 ml-auto text-[#f4c430]" />
+                <span className="truncate">{item.label}</span>
+                {active && (
+                  <ChevronRight className="w-3 h-3 ml-auto text-white/60" />
                 )}
               </Link>
             );
           })}
         </nav>
 
-        <div className="p-4 border-t border-white/10">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-8 h-8 rounded-full bg-[#1077A6] flex items-center justify-center text-xs font-bold">
+        <div className="p-3 border-t border-[#1077a6]/8">
+          <div className="flex items-center gap-2.5 mb-2.5 px-1">
+            <div className="w-7 h-7 rounded-full bg-[#1077a6]/10 text-[#1077a6] flex items-center justify-center text-[10px] font-bold shrink-0">
               {session.user.name?.charAt(0).toUpperCase() || "A"}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold truncate">
+              <p className="text-[11px] font-semibold text-[#1a1550] truncate">
                 {session.user.name}
               </p>
-              <p className="text-xs text-white/40 truncate">
+              <p className="text-[9px] text-[#1a1550]/30 truncate">
                 {session.user.email}
               </p>
             </div>
           </div>
-          <button
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() => signOut({ callbackUrl: "/auth/login" })}
-            className="w-full flex items-center justify-center gap-2 bg-white/5 hover:bg-red-500/20 hover:text-red-400 text-white/60 text-sm font-medium py-2 rounded-lg transition-all duration-200"
+            className="w-full h-8 text-[11px] text-[#1a1550]/40 hover:text-red-500 hover:bg-red-50 justify-center gap-1.5 rounded-lg"
           >
-            <LogOut className="w-4 h-4" />
-            Sign Out
-          </button>
+            <LogOut className="w-3.5 h-3.5" /> Sign Out
+          </Button>
         </div>
       </aside>
 
-      {/* Main content */}
-      <div className="flex-1 flex flex-col min-h-screen">
-        {/* Top bar */}
-        <header className="sticky top-0 z-30 bg-white border-b border-[#1077A6]/10 px-4 lg:px-8 py-3 flex items-center gap-4">
+      <div className="flex-1 flex flex-col min-w-0">
+        <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-[#1077a6]/8 px-3 lg:px-5 h-12 flex items-center gap-3">
           <button
-            onClick={() => setSidebarOpen(true)}
-            className="lg:hidden w-10 h-10 flex items-center justify-center rounded-lg bg-[#f8f7fc] hover:bg-[#1077A6]/10 transition-colors"
+            onClick={() => setOpen(true)}
+            className="lg:hidden p-1.5 rounded-lg hover:bg-[#1077a6]/5 text-[#1a1550]/50"
           >
-            {sidebarOpen ? (
-              <X className="w-5 h-5" />
-            ) : (
-              <Menu className="w-5 h-5" />
-            )}
+            <Menu className="w-4 h-4" />
           </button>
 
-          <div className="flex-1">
-            <h1 className="font-display font-bold text-[#1a1550] text-lg">
-              {SIDEBAR_ITEMS.find(
-                (item) =>
-                  pathname === item.href ||
-                  (item.href !== "/admin" && pathname.startsWith(item.href)),
-              )?.label || "Dashboard"}
-            </h1>
-          </div>
+          <motion.h1
+            key={current}
+            initial={{ opacity: 0, x: -6 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="text-sm font-bold text-[#1a1550] flex-1"
+          >
+            {current}
+          </motion.h1>
 
           <Link
             href="/"
             target="_blank"
-            className="text-xs text-[#1077A6] font-semibold hover:underline"
+            className="flex items-center gap-1 text-[10px] text-[#1077a6] font-semibold hover:text-[#1077a6]/70 transition-colors"
           >
-            View Site →
+            View Site <ExternalLink className="w-3 h-3" />
           </Link>
         </header>
 
-        <main className="flex-1 p-4 lg:p-8">{children}</main>
+        <main className="flex-1 p-3 lg:p-5 bg-[#f8f9fb]">
+          <motion.div
+            key={pathname}
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.25 }}
+          >
+            {children}
+          </motion.div>
+        </main>
       </div>
     </div>
   );

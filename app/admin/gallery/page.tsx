@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Plus,
   Pencil,
@@ -10,11 +11,15 @@ import {
   X,
   ImageIcon,
   FolderOpen,
+  Loader2,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
 import ImageUpload from "@/components/admin/ImageUpload";
 import Image from "next/image";
 
-interface GalleryCategory {
+interface GalleryCat {
   id: number;
   slug: string;
   label: string;
@@ -22,8 +27,7 @@ interface GalleryCategory {
   sortOrder: number;
   active: boolean;
 }
-
-interface GalleryImage {
+interface GalleryImg {
   id: number;
   categoryId: number;
   src: string;
@@ -33,422 +37,404 @@ interface GalleryImage {
   active: boolean;
 }
 
+const inputCls =
+  "h-8 text-xs border-[#1077a6]/[0.15] rounded-lg focus:border-[#1077a6] focus:ring-1 focus:ring-[#1077a6]/10 text-[#1a1550] placeholder:text-[#1a1550]/20";
+const labelCls = "text-[10px] font-medium text-[#1a1550]/40 mb-0.5 block";
+
 export default function GalleryAdmin() {
-  const [categories, setCategories] = useState<GalleryCategory[]>([]);
-  const [images, setImages] = useState<GalleryImage[]>([]);
+  const [cats, setCats] = useState<GalleryCat[]>([]);
+  const [imgs, setImgs] = useState<GalleryImg[]>([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const [editCat, setEditCat] = useState<Partial<GalleryCat> | null>(null);
+  const [editImg, setEditImg] = useState<Partial<GalleryImg> | null>(null);
+  const [activeCat, setActiveCat] = useState<number | null>(null);
 
-  const [editingCat, setEditingCat] = useState<Partial<GalleryCategory> | null>(
-    null,
-  );
-  const [editingImg, setEditingImg] = useState<Partial<GalleryImage> | null>(
-    null,
-  );
-  const [activeCategory, setActiveCategory] = useState<number | null>(null);
-
-  const fetchData = useCallback(async () => {
+  const fetch_ = useCallback(async () => {
     try {
-      const res = await fetch("/api/gallery");
-      const data = await res.json();
-      if (data.success) {
-        const cats = data.data.map(
-          (d: {
+      const r = await fetch("/api/gallery");
+      const d = await r.json();
+      if (d.success) {
+        const c = d.data.map(
+          (x: {
             id: number;
             name: string;
             slug: string;
             description: string | null;
-            images: GalleryImage[];
+            images: GalleryImg[];
           }) => ({
-            id: d.id,
-            label: d.name,
-            slug: d.slug,
-            description: d.description,
+            id: x.id,
+            label: x.name,
+            slug: x.slug,
+            description: x.description,
             sortOrder: 0,
             active: true,
           }),
         );
-        setCategories(cats);
-        const imgs = data.data.flatMap(
-          (d: { images: GalleryImage[] }) => d.images,
-        );
-        setImages(imgs);
-        if (cats.length > 0 && !activeCategory) setActiveCategory(cats[0].id);
-      } else setError(data.error);
+        setCats(c);
+        setImgs(d.data.flatMap((x: { images: GalleryImg[] }) => x.images));
+        if (c.length > 0 && !activeCat) setActiveCat(c[0].id);
+      } else setError(d.error);
     } catch {
-      setError("Failed to load gallery.");
+      setError("Failed to load.");
     } finally {
       setLoading(false);
     }
-  }, [activeCategory]);
+  }, [activeCat]);
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    fetch_();
+  }, [fetch_]);
 
-  /* ── Category CRUD ── */
   const saveCat = async () => {
-    if (!editingCat) return;
+    if (!editCat) return;
     setError("");
     try {
-      const isNew = !editingCat.id;
-      const res = await fetch(
-        isNew ? "/api/gallery" : `/api/gallery/${editingCat.id}`,
+      const isNew = !editCat.id;
+      const r = await fetch(
+        isNew ? "/api/gallery" : `/api/gallery/${editCat.id}`,
         {
           method: isNew ? "POST" : "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(editingCat),
+          body: JSON.stringify(editCat),
         },
       );
-      const data = await res.json();
-      if (data.success) {
-        setEditingCat(null);
-        fetchData();
-      } else setError(data.error);
+      const d = await r.json();
+      if (d.success) {
+        setEditCat(null);
+        fetch_();
+      } else setError(d.error);
     } catch {
-      setError("Failed to save category.");
+      setError("Failed to save.");
     }
   };
 
-  const deleteCat = async (id: number) => {
-    if (!confirm("Delete this category and all its images?")) return;
+  const delCat = async (id: number) => {
+    if (!confirm("Delete category and all images?")) return;
     try {
-      const res = await fetch(`/api/gallery/${id}`, { method: "DELETE" });
-      const data = await res.json();
-      if (data.success) fetchData();
-      else setError(data.error);
+      const r = await fetch(`/api/gallery/${id}`, { method: "DELETE" });
+      const d = await r.json();
+      if (d.success) fetch_();
+      else setError(d.error);
     } catch {
-      setError("Failed to delete category.");
+      setError("Failed to delete.");
     }
   };
 
-  /* ── Image CRUD ── */
   const saveImg = async () => {
-    if (!editingImg || !editingImg.src) return;
+    if (!editImg || !editImg.src) return;
     setError("");
     try {
-      const res = await fetch("/api/gallery/images", {
+      const r = await fetch("/api/gallery/images", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(editingImg),
+        body: JSON.stringify(editImg),
       });
-      const data = await res.json();
-      if (data.success) {
-        setEditingImg(null);
-        fetchData();
-      } else setError(data.error);
+      const d = await r.json();
+      if (d.success) {
+        setEditImg(null);
+        fetch_();
+      } else setError(d.error);
     } catch {
-      setError("Failed to save image.");
+      setError("Failed to save.");
     }
   };
 
-  const deleteImg = async (id: number) => {
-    if (!confirm("Delete this image?")) return;
+  const delImg = async (id: number) => {
+    if (!confirm("Delete?")) return;
     try {
-      const res = await fetch(`/api/gallery/images?id=${id}`, {
+      const r = await fetch(`/api/gallery/images?id=${id}`, {
         method: "DELETE",
       });
-      const data = await res.json();
-      if (data.success) fetchData();
-      else setError(data.error);
+      const d = await r.json();
+      if (d.success) fetch_();
+      else setError(d.error);
     } catch {
-      setError("Failed to delete image.");
+      setError("Failed to delete.");
     }
   };
 
-  const categoryImages = images.filter(
-    (img) => img.categoryId === activeCategory,
-  );
+  const catImgs = imgs.filter((i) => i.categoryId === activeCat);
 
   if (loading)
     return (
-      <div className="bg-white rounded-xl border p-8 text-center text-[#1a1550]/50">
-        Loading...
+      <div className="flex items-center justify-center py-16">
+        <Loader2 className="w-5 h-5 text-[#1077a6] animate-spin" />
       </div>
     );
 
   return (
-    <div className="space-y-4">
+    <motion.div
+      className="space-y-3"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+    >
       {error && (
-        <div className="flex items-center gap-2 bg-red-50 text-red-700 rounded-lg p-3 text-sm border border-red-200">
-          <AlertCircle className="w-4 h-4" /> {error}
+        <div className="flex items-center gap-2 bg-red-50 text-red-600 rounded-lg p-2.5 text-xs border border-red-100">
+          <AlertCircle className="w-3.5 h-3.5" /> {error}
         </div>
       )}
 
-      {/* ── Categories Management ── */}
-      <div className="bg-white rounded-xl border border-[#1077A6]/10 p-5">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="font-display font-bold text-[#1a1550] text-base flex items-center gap-2">
-            <FolderOpen className="w-4 h-4 text-[#1077A6]" /> Categories
-          </h3>
-          <button
-            onClick={() =>
-              setEditingCat({
-                slug: "",
-                label: "",
-                description: "",
-                sortOrder: 0,
-                active: true,
-              })
-            }
-            className="flex items-center gap-2 bg-[#1077A6] text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-[#0e6590]"
-          >
-            <Plus className="w-3.5 h-3.5" /> Add Category
-          </button>
-        </div>
-
-        {editingCat && (
-          <div className="border border-[#1077A6]/20 rounded-lg p-4 mb-4 space-y-3">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <div>
-                <label className="block text-xs font-semibold text-[#1a1550]/60 mb-1">
-                  Slug
-                </label>
-                <input
-                  type="text"
-                  value={editingCat.slug || ""}
-                  onChange={(e) =>
-                    setEditingCat({ ...editingCat, slug: e.target.value })
-                  }
-                  placeholder="e.g. tribal-festivals"
-                  className="w-full border border-[#1077A6]/15 rounded-lg px-3 py-2 text-sm text-[#1a1550] focus:border-[#1077A6] outline-none"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-[#1a1550]/60 mb-1">
-                  Label
-                </label>
-                <input
-                  type="text"
-                  value={editingCat.label || ""}
-                  onChange={(e) =>
-                    setEditingCat({ ...editingCat, label: e.target.value })
-                  }
-                  placeholder="e.g. Tribal Festivals"
-                  className="w-full border border-[#1077A6]/15 rounded-lg px-3 py-2 text-sm text-[#1a1550] focus:border-[#1077A6] outline-none"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-[#1a1550]/60 mb-1">
-                  Sort Order
-                </label>
-                <input
-                  type="number"
-                  value={editingCat.sortOrder || 0}
-                  onChange={(e) =>
-                    setEditingCat({
-                      ...editingCat,
-                      sortOrder: parseInt(e.target.value) || 0,
-                    })
-                  }
-                  className="w-full border border-[#1077A6]/15 rounded-lg px-3 py-2 text-sm text-[#1a1550] focus:border-[#1077A6] outline-none"
-                />
-              </div>
-            </div>
-            <div>
-              <label className="block text-xs font-semibold text-[#1a1550]/60 mb-1">
-                Description
-              </label>
-              <input
-                type="text"
-                value={editingCat.description || ""}
-                onChange={(e) =>
-                  setEditingCat({ ...editingCat, description: e.target.value })
-                }
-                placeholder="Optional description"
-                className="w-full border border-[#1077A6]/15 rounded-lg px-3 py-2 text-sm text-[#1a1550] focus:border-[#1077A6] outline-none"
-              />
-            </div>
-            <div className="flex gap-2">
-              <button
-                onClick={saveCat}
-                className="flex items-center gap-1.5 bg-[#1077A6] text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-[#0e6590]"
-              >
-                <Save className="w-3.5 h-3.5" /> Save
-              </button>
-              <button
-                onClick={() => setEditingCat(null)}
-                className="flex items-center gap-1.5 bg-gray-100 text-[#1a1550] px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-gray-200"
-              >
-                <X className="w-3.5 h-3.5" /> Cancel
-              </button>
-            </div>
-          </div>
-        )}
-
-        <div className="flex flex-wrap gap-2">
-          {categories.map((cat) => (
-            <div key={cat.id} className="flex items-center gap-1.5">
-              <button
-                onClick={() => setActiveCategory(cat.id)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
-                  activeCategory === cat.id
-                    ? "bg-[#1077A6] text-white"
-                    : "bg-[#f8f7fc] text-[#1a1550] hover:bg-[#1077A6]/10"
-                }`}
-              >
-                {cat.label} (
-                {categoryImages.length ===
-                  images.filter((i) => i.categoryId === cat.id).length &&
-                activeCategory === cat.id
-                  ? categoryImages.length
-                  : images.filter((i) => i.categoryId === cat.id).length}
-                )
-              </button>
-              <button
-                onClick={() => setEditingCat(cat)}
-                className="p-1 rounded hover:bg-[#1077A6]/10 text-[#1077A6]"
-              >
-                <Pencil className="w-3 h-3" />
-              </button>
-              <button
-                onClick={() => deleteCat(cat.id)}
-                className="p-1 rounded hover:bg-red-50 text-red-500"
-              >
-                <Trash2 className="w-3 h-3" />
-              </button>
-            </div>
-          ))}
-          {categories.length === 0 && (
-            <p className="text-[#1a1550]/40 text-sm">
-              No categories yet. Create one above.
-            </p>
-          )}
-        </div>
-      </div>
-
-      {/* ── Images for Active Category ── */}
-      {activeCategory && (
-        <div className="bg-white rounded-xl border border-[#1077A6]/10 p-5">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-display font-bold text-[#1a1550] text-base flex items-center gap-2">
-              <ImageIcon className="w-4 h-4 text-[#1077A6]" /> Images in{" "}
-              {categories.find((c) => c.id === activeCategory)?.label}
-            </h3>
-            <button
+      <Card className="border-[#1077a6]/[0.12]">
+        <CardContent className="p-3 space-y-2.5">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-[#1a1550] flex items-center gap-1.5">
+              <FolderOpen className="w-3.5 h-3.5 text-[#1077a6]" /> Categories
+            </span>
+            <Button
+              size="sm"
               onClick={() =>
-                setEditingImg({
-                  categoryId: activeCategory,
-                  src: "",
-                  alt: "",
-                  caption: "",
+                setEditCat({
+                  slug: "",
+                  label: "",
+                  description: "",
                   sortOrder: 0,
                   active: true,
                 })
               }
-              className="flex items-center gap-2 bg-[#1077A6] text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-[#0e6590]"
+              className="h-7 text-[10px] gap-1 bg-[#1077a6] hover:bg-[#1077a6]/90 rounded-md"
             >
-              <Plus className="w-3.5 h-3.5" /> Add Image
-            </button>
+              <Plus className="w-3 h-3" /> Add
+            </Button>
           </div>
 
-          {editingImg && (
-            <div className="border border-[#1077A6]/20 rounded-lg p-4 mb-4 space-y-3">
-              <ImageUpload
-                value={editingImg.src || ""}
-                onChange={(url) => setEditingImg({ ...editingImg, src: url })}
-                label="Gallery Image"
-                endpoint="galleryUploader"
-              />
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <div>
-                  <label className="block text-xs font-semibold text-[#1a1550]/60 mb-1">
-                    Alt Text
-                  </label>
-                  <input
-                    type="text"
-                    value={editingImg.alt || ""}
-                    onChange={(e) =>
-                      setEditingImg({ ...editingImg, alt: e.target.value })
-                    }
-                    placeholder="Describe the image"
-                    className="w-full border border-[#1077A6]/15 rounded-lg px-3 py-2 text-sm text-[#1a1550] focus:border-[#1077A6] outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-[#1a1550]/60 mb-1">
-                    Caption
-                  </label>
-                  <input
-                    type="text"
-                    value={editingImg.caption || ""}
-                    onChange={(e) =>
-                      setEditingImg({ ...editingImg, caption: e.target.value })
-                    }
-                    placeholder="Optional caption"
-                    className="w-full border border-[#1077A6]/15 rounded-lg px-3 py-2 text-sm text-[#1a1550] focus:border-[#1077A6] outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-[#1a1550]/60 mb-1">
-                    Sort Order
-                  </label>
-                  <input
-                    type="number"
-                    value={editingImg.sortOrder || 0}
-                    onChange={(e) =>
-                      setEditingImg({
-                        ...editingImg,
-                        sortOrder: parseInt(e.target.value) || 0,
-                      })
-                    }
-                    className="w-full border border-[#1077A6]/15 rounded-lg px-3 py-2 text-sm text-[#1a1550] focus:border-[#1077A6] outline-none"
-                  />
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={saveImg}
-                  className="flex items-center gap-1.5 bg-[#1077A6] text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-[#0e6590]"
-                >
-                  <Save className="w-3.5 h-3.5" /> Save
-                </button>
-                <button
-                  onClick={() => setEditingImg(null)}
-                  className="flex items-center gap-1.5 bg-gray-100 text-[#1a1550] px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-gray-200"
-                >
-                  <X className="w-3.5 h-3.5" /> Cancel
-                </button>
-              </div>
-            </div>
-          )}
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-            {categoryImages.map((img) => (
-              <div
-                key={img.id}
-                className="group relative rounded-lg overflow-hidden border border-[#1077A6]/10 bg-[#f8f7fc] aspect-square"
+          <AnimatePresence>
+            {editCat && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                className="border border-[#1077a6]/20 rounded-lg p-3 space-y-2"
               >
-                <Image
-                  src={img.src}
-                  alt={img.alt}
-                  fill
-                  className="object-cover"
-                  unoptimized
-                />
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-200 flex items-center justify-center">
-                  <button
-                    onClick={() => deleteImg(img.id)}
-                    className="opacity-0 group-hover:opacity-100 bg-red-500 text-white p-2 rounded-lg transition-opacity duration-200"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-                {img.alt && (
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2">
-                    <p className="text-white text-[10px] truncate">{img.alt}</p>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <div>
+                    <label className={labelCls}>Slug</label>
+                    <Input
+                      value={editCat.slug || ""}
+                      onChange={(e) =>
+                        setEditCat({ ...editCat, slug: e.target.value })
+                      }
+                      className={inputCls}
+                    />
                   </div>
-                )}
+                  <div>
+                    <label className={labelCls}>Label</label>
+                    <Input
+                      value={editCat.label || ""}
+                      onChange={(e) =>
+                        setEditCat({ ...editCat, label: e.target.value })
+                      }
+                      className={inputCls}
+                    />
+                  </div>
+                  <div>
+                    <label className={labelCls}>Sort</label>
+                    <Input
+                      type="number"
+                      value={editCat.sortOrder || 0}
+                      onChange={(e) =>
+                        setEditCat({
+                          ...editCat,
+                          sortOrder: parseInt(e.target.value) || 0,
+                        })
+                      }
+                      className={inputCls}
+                    />
+                  </div>
+                </div>
+                <div className="flex gap-1.5">
+                  <Button
+                    size="sm"
+                    onClick={saveCat}
+                    className="h-7 text-[10px] gap-1 bg-[#1077a6] hover:bg-[#1077a6]/90 rounded-md"
+                  >
+                    <Save className="w-3 h-3" /> Save
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setEditCat(null)}
+                    className="h-7 text-[10px] gap-1 rounded-md border-[#1077a6]/20"
+                  >
+                    <X className="w-3 h-3" /> Cancel
+                  </Button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <div className="flex flex-wrap gap-1.5">
+            {cats.map((c) => (
+              <div key={c.id} className="flex items-center gap-0.5">
+                <button
+                  onClick={() => setActiveCat(c.id)}
+                  className={`px-2.5 py-1.5 rounded-md text-[10px] font-semibold transition-colors ${activeCat === c.id ? "bg-[#1077a6] text-white" : "bg-[#1077a6]/[0.05] text-[#1077a6] hover:bg-[#1077a6]/10"}`}
+                >
+                  {c.label} ({imgs.filter((i) => i.categoryId === c.id).length})
+                </button>
+                <button
+                  onClick={() => setEditCat(c)}
+                  className="p-1 rounded hover:bg-[#1077a6]/10 text-[#1077a6]"
+                >
+                  <Pencil className="w-2.5 h-2.5" />
+                </button>
+                <button
+                  onClick={() => delCat(c.id)}
+                  className="p-1 rounded hover:bg-red-50 text-red-400"
+                >
+                  <Trash2 className="w-2.5 h-2.5" />
+                </button>
               </div>
             ))}
-            {categoryImages.length === 0 && (
-              <div className="col-span-full text-center py-8 text-[#1a1550]/40 text-sm">
-                No images in this category yet.
-              </div>
+            {cats.length === 0 && (
+              <p className="text-[10px] text-[#1a1550]/20">
+                No categories yet.
+              </p>
             )}
           </div>
-        </div>
+        </CardContent>
+      </Card>
+
+      
+      {activeCat && (
+        <Card className="border-[#1077a6]/[0.12]">
+          <CardContent className="p-3 space-y-2.5">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-[#1a1550] flex items-center gap-1.5">
+                <ImageIcon className="w-3.5 h-3.5 text-[#1077a6]" />{" "}
+                {cats.find((c) => c.id === activeCat)?.label}
+              </span>
+              <Button
+                size="sm"
+                onClick={() =>
+                  setEditImg({
+                    categoryId: activeCat,
+                    src: "",
+                    alt: "",
+                    caption: "",
+                    sortOrder: 0,
+                    active: true,
+                  })
+                }
+                className="h-7 text-[10px] gap-1 bg-[#1077a6] hover:bg-[#1077a6]/90 rounded-md"
+              >
+                <Plus className="w-3 h-3" /> Add Image
+              </Button>
+            </div>
+
+            <AnimatePresence>
+              {editImg && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="border border-[#1077a6]/20 rounded-lg p-3 space-y-2"
+                >
+                  <ImageUpload
+                    value={editImg.src || ""}
+                    onChange={(url) => setEditImg({ ...editImg, src: url })}
+                    label="Image"
+                    endpoint="galleryUploader"
+                  />
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <div>
+                      <label className={labelCls}>Alt Text</label>
+                      <Input
+                        value={editImg.alt || ""}
+                        onChange={(e) =>
+                          setEditImg({ ...editImg, alt: e.target.value })
+                        }
+                        className={inputCls}
+                      />
+                    </div>
+                    <div>
+                      <label className={labelCls}>Caption</label>
+                      <Input
+                        value={editImg.caption || ""}
+                        onChange={(e) =>
+                          setEditImg({ ...editImg, caption: e.target.value })
+                        }
+                        className={inputCls}
+                      />
+                    </div>
+                    <div>
+                      <label className={labelCls}>Sort</label>
+                      <Input
+                        type="number"
+                        value={editImg.sortOrder || 0}
+                        onChange={(e) =>
+                          setEditImg({
+                            ...editImg,
+                            sortOrder: parseInt(e.target.value) || 0,
+                          })
+                        }
+                        className={inputCls}
+                      />
+                    </div>
+                  </div>
+                  <div className="flex gap-1.5">
+                    <Button
+                      size="sm"
+                      onClick={saveImg}
+                      className="h-7 text-[10px] gap-1 bg-[#1077a6] hover:bg-[#1077a6]/90 rounded-md"
+                    >
+                      <Save className="w-3 h-3" /> Save
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setEditImg(null)}
+                      className="h-7 text-[10px] gap-1 rounded-md border-[#1077a6]/20"
+                    >
+                      <X className="w-3 h-3" /> Cancel
+                    </Button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
+              {catImgs.map((img, i) => (
+                <motion.div
+                  key={img.id}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: i * 0.03 }}
+                  className="group relative rounded-lg overflow-hidden border border-[#1077a6]/[0.08] bg-[#1077a6]/[0.02] aspect-square"
+                >
+                  <Image
+                    src={img.src}
+                    alt={img.alt}
+                    fill
+                    className="object-cover"
+                    unoptimized
+                  />
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex items-center justify-center">
+                    <button
+                      onClick={() => delImg(img.id)}
+                      className="opacity-0 group-hover:opacity-100 bg-red-500 text-white p-1.5 rounded-md transition-opacity"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                  {img.alt && (
+                    <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/50 to-transparent p-1">
+                      <p className="text-white text-[8px] truncate">
+                        {img.alt}
+                      </p>
+                    </div>
+                  )}
+                </motion.div>
+              ))}
+              {catImgs.length === 0 && (
+                <div className="col-span-full text-center py-10 text-[10px] text-[#1a1550]/20">
+                  No images yet.
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
       )}
-    </div>
+    </motion.div>
   );
 }

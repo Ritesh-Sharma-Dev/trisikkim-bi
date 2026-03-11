@@ -2,12 +2,13 @@
 
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
-import { AlertCircle, Save } from "lucide-react";
+import { AlertCircle, Save, CheckCircle2, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const RichEditor = dynamic(() => import("@/components/admin/RichEditor"), {
   ssr: false,
   loading: () => (
-    <div className="border rounded-lg p-4 text-sm text-[#1a1550]/40">
+    <div className="border border-[#1077a6]/[0.12] rounded-lg p-4 text-sm text-[#1a1550]/40">
       Loading editor...
     </div>
   ),
@@ -18,6 +19,7 @@ export default function AboutAdmin() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     fetch("/api/pages/about")
@@ -35,6 +37,7 @@ export default function AboutAdmin() {
   const handleSave = async () => {
     setError("");
     setSuccess("");
+    setSaving(true);
     try {
       const res = await fetch("/api/pages/about", {
         method: "PUT",
@@ -51,35 +54,36 @@ export default function AboutAdmin() {
       } else setError(data.error);
     } catch {
       setError("Failed to save.");
+    } finally {
+      setSaving(false);
     }
   };
 
   if (loading)
     return (
-      <div className="bg-white rounded-xl border p-8 text-center text-[#1a1550]/50">
-        Loading...
+      <div className="flex items-center justify-center py-16">
+        <Loader2 className="w-5 h-5 text-[#1077a6] animate-spin" />
       </div>
     );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {error && (
-        <div className="flex items-center gap-2 bg-red-50 text-red-700 rounded-lg p-3 text-sm border border-red-200">
-          <AlertCircle className="w-4 h-4" /> {error}
+        <div className="flex items-center gap-2 bg-red-50 text-red-600 rounded-lg p-3 text-xs border border-red-100">
+          <AlertCircle className="w-3.5 h-3.5" /> {error}
         </div>
       )}
       {success && (
-        <div className="flex items-center gap-2 bg-green-50 text-green-700 rounded-lg p-3 text-sm border border-green-200">
-          <Save className="w-4 h-4" /> {success}
+        <div className="flex items-center gap-2 bg-emerald-50 text-emerald-600 rounded-lg p-3 text-xs border border-emerald-100">
+          <CheckCircle2 className="w-3.5 h-3.5" /> {success}
         </div>
       )}
 
-      {/* ── Page Content ── */}
-      <div className="bg-white rounded-xl border border-[#1077A6]/10 p-6">
-        <h3 className="font-display font-bold text-[#1a1550] text-lg mb-1">
+      <div className="bg-white rounded-xl border border-[#1077a6]/[0.12] p-5">
+        <p className="font-bold text-[#1a1550] text-sm mb-1">
           About Us Content
-        </h3>
-        <p className="text-[#1a1550]/50 text-xs mb-4">
+        </p>
+        <p className="text-[#1a1550]/40 text-xs mb-4">
           This content is displayed on the About Us page below the hero banner.
         </p>
         <RichEditor
@@ -89,14 +93,20 @@ export default function AboutAdmin() {
         />
       </div>
 
-      {/* ── Save Button ── */}
       <div className="flex justify-end">
-        <button
+        <Button
+          size="sm"
           onClick={handleSave}
-          className="flex items-center gap-2 bg-[#1077A6] text-white px-6 py-2.5 rounded-lg text-sm font-semibold hover:bg-[#0e6590]"
+          disabled={saving}
+          className="h-8 text-xs gap-1.5 bg-[#1077a6] hover:bg-[#1077a6]/90 rounded-lg"
         >
-          <Save className="w-4 h-4" /> Save About Page
-        </button>
+          {saving ? (
+            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+          ) : (
+            <Save className="w-3.5 h-3.5" />
+          )}{" "}
+          Save About Page
+        </Button>
       </div>
     </div>
   );
